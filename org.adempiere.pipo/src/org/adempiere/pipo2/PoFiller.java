@@ -6,6 +6,8 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.MAttachment;
@@ -49,14 +51,14 @@ public class PoFiller{
 		return value;
 	}
 	
+	final static Pattern regBlobType = Pattern.compile("\\d+\\.dat\\|string");
 	protected boolean isBlobOnPackinFile (String columnName){
 		String value = getStringValue(columnName);
 		if(value == null)
 			return false;
 		
-		String strParts [] = value.split("[|]");
-		return strParts.length == 2;
-
+		Matcher machBlobType = regBlobType.matcher(value);
+		return machBlobType.matches();
 	}
 	
 	/**

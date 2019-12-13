@@ -2351,7 +2351,7 @@ public final class DB
 			
 			String viewIDValue = saveKey.getName();
 			// when no process have viewID or this process have no viewID or value of viewID is null
-			if (viewIDValue == null){
+			if (viewIDValue == null || "".equals(viewIDValue)){ //saveKey.getName() return empty when null 
 				insert.append("NULL");
 			}else{
 				insert.append("'");

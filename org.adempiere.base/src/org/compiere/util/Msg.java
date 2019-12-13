@@ -318,29 +318,39 @@ public final class Msg
 	public static String getMsg (String ad_language, String AD_Message, boolean getText)
 	{
 		String retStr = getMsg (ad_language, AD_Message);
-		int pos = retStr.indexOf(SEPARATOR);
+		return getMsgPart(retStr, getText);
+	}	//	getMsg
+
+	/**
+	 * getText = true then return message part other return tooltip part
+	 * @param msg
+	 * @param getText
+	 * @return
+	 */
+	public static String getMsgPart (String msg, boolean getText){
+		int pos = msg.indexOf(SEPARATOR);
 		//  No Tip
 		if (pos == -1)
 		{
 			if (getText)
-				return retStr;
+				return msg;
 			else
 				return "";
 		}
 		else    //  with Tip
 		{
 			if (getText)
-				retStr = retStr.substring (0, pos);
+				msg = msg.substring (0, pos);
 			else
 			{
 				int start = pos + SEPARATOR.length();
 			//	int end = retStr.length();
-				retStr = retStr.substring (start);
+				msg = msg.substring (start);
 			}
 		}
-		return retStr;
-	}	//	getMsg
-
+		return msg;
+	}
+	
 	/**
 	 *  Get translated text message for AD_Message
 	 *  @param  ctx Context to retrieve language

@@ -44,6 +44,7 @@ import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Language;
 import org.compiere.util.MSort;
+import org.compiere.util.Msg;
 import org.compiere.util.Util;
 import org.zkoss.image.AImage;
 import org.zkoss.zk.ui.Component;
@@ -105,7 +106,8 @@ public class WListItemRenderer implements ListitemRenderer<Object>, EventListene
 		for (String columnName : columnNames)
 		{
 			tableColumn = new WTableColumn();
-			tableColumn.setHeaderValue(Util.cleanAmp(columnName));
+			tableColumn.setHeaderValue(Util.cleanAmp(Msg.getMsgPart(columnName, true)));
+			tableColumn.setTooltipText(Util.cleanAmp(Msg.getMsgPart(columnName, false)));
 			m_tableColumns.add(tableColumn);
 		}
 	}

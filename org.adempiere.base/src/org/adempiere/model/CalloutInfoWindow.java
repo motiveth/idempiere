@@ -149,4 +149,9 @@ public class CalloutInfoWindow implements IColumnCallout {
 		return "";
 	}
 
+	@Override
+	public boolean isBeforeDefault(String tableName, String columnName) {
+		return false;
+	}
+
 }

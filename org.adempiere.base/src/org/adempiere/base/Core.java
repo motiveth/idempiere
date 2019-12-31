@@ -81,13 +81,16 @@ public class Core {
 		};
 	}
 
+	public static List<IColumnCallout> findCallout(String tableName, String columnName) {
+		return findCallout(tableName, columnName, null);
+	}
 	/**
 	 *
 	 * @param tableName
 	 * @param columnName
 	 * @return list of callout register for tableName.columnName
 	 */
-	public static List<IColumnCallout> findCallout(String tableName, String columnName) {
+	public static List<IColumnCallout> findCallout(String tableName, String columnName, Boolean isBeforeDefault) {
 		List<IColumnCallout> list = new ArrayList<IColumnCallout>();
 		List<IColumnCalloutFactory> factories = Service.locator().list(IColumnCalloutFactory.class).getServices();
 		if (factories != null) {
@@ -95,7 +98,11 @@ public class Core {
 				IColumnCallout[] callouts = factory.getColumnCallouts(tableName, columnName);
 				if (callouts != null && callouts.length > 0) {
 					for(IColumnCallout callout : callouts) {
-						list.add(callout);
+						if (isBeforeDefault == null || 
+								(isBeforeDefault && callout.isBeforeDefault(tableName, columnName)) ||
+								(!isBeforeDefault && !callout.isBeforeDefault(tableName, columnName))
+								)
+							list.add(callout);
 					}
 				}
 			}

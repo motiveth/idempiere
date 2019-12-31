@@ -44,5 +44,9 @@ public interface IColumnCallout
 	 */
 	public String start (Properties ctx, int WindowNo,
 		GridTab mTab, GridField mField, Object value, Object oldValue);
+	
+	default boolean isBeforeDefault (String tableName, String columnName) {
+		return false;
+	}
 
 }

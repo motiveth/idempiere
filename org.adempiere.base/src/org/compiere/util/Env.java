@@ -374,6 +374,40 @@ public final class Env
 	}	//	setContext
 	
 	/**
+	 *	Set Context for Window to Value
+	 *  @param ctx context
+	 *  @param WindowNo window no
+	 *  @param context context key
+	 *  @param value context value
+	 */
+	public static void setContext (Properties ctx, int WindowNo, int tabNo, String context, Timestamp value)
+	{
+		if (ctx == null || context == null)
+			return;
+		Object oldValue = ctx.getProperty(WindowNo+"|"+tabNo+"|"+context);
+		if (value == null)
+		{
+			ctx.remove(WindowNo+"|"+tabNo+"|"+context);
+			if (log.isLoggable(Level.FINER)) log.finer("Context("+WindowNo+") " + context + "==" + value);
+		}
+		else
+		{	//	JDBC Format	2005-05-09 00:00:00.0
+			// BUG:3075946 KTU, Fix Thai year 
+			//String stringValue = value.toString();
+			String stringValue = "";
+			Calendar c1 = Calendar.getInstance();
+			c1.setTime(value);
+			stringValue = DisplayType.getTimestampFormat_Default().format(c1.getTime());
+			//	Chop off .0 (nanos)
+			//stringValue = stringValue.substring(0, stringValue.indexOf("."));
+			// KTU
+			ctx.setProperty(WindowNo+"|"+tabNo+"|"+context, stringValue);
+			if (log.isLoggable(Level.FINER)) log.finer("Context("+WindowNo+") " + context + "==" + stringValue);
+		}
+		
+	}	//	setContext
+	
+	/**
 	 *	Set Context for Window to int Value
 	 *  @param ctx context
 	 *  @param WindowNo window no

@@ -1567,6 +1567,8 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 		
 		if (keyColumValue instanceof Integer){
 			keyValue = (Integer)keyColumValue;
+		}else if(keyColumValue instanceof KeyNamePair){
+			keyValue = ((KeyNamePair)keyColumValue).getKey();
 		}else {
 			String msg = "keyView column must be integer";
 			AdempiereException ex = new AdempiereException (msg);

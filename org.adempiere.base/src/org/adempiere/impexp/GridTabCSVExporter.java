@@ -497,7 +497,12 @@ public class GridTabCSVExporter implements IGridTabExporter
 			}
 		} else if (DisplayType.Account == column.getAD_Reference_ID()) {
 			name.append("[Combination]");
+		}else if (DisplayType.Locator == column.getAD_Reference_ID()) {
+			name.append("[Value]");
+		}else if (DisplayType.PAttribute == column.getAD_Reference_ID()) {
+			name.append("[Description]");
 		}
+
 		return name.toString();
 	}
 	

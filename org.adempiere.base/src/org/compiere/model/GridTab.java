@@ -1601,7 +1601,45 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 	 */
 	public String get_ValueAsString (String variableName)
 	{
-		return Env.getContext (m_vo.ctx, m_vo.WindowNo, m_vo.TabNo, variableName, false, true);
+		//ref column
+		String foreignColumn = "";
+		int f = variableName.indexOf('.');
+		if (f > 0) {
+			foreignColumn = variableName.substring(f+1, variableName.length());
+			variableName = variableName.substring(0, f);
+		}
+		
+		String value = null;
+		if( m_vo.TabNo == 0)
+	    	value = Env.getContext (m_vo.ctx, m_vo.WindowNo, variableName, true);
+	    else
+	    {
+	    	boolean tabOnly = false;
+	    	if (variableName.startsWith("~")) 
+	    	{
+	    		variableName = variableName.substring(1);
+	    		tabOnly = true;
+	    	}
+	    	value = Env.getContext (m_vo.ctx, m_vo.WindowNo, m_vo.TabNo, variableName, tabOnly, true);
+	    }
+		if (!Util.isEmpty(value) && !Util.isEmpty(foreignColumn) && variableName.endsWith("_ID")) {
+			String refValue = "";
+			int id = 0;
+			try {
+				id = Integer.parseInt(value);
+			} catch (Exception e){}
+			if (id > 0) {
+				MColumn column = MColumn.get(m_vo.ctx, getTableName(), variableName);
+				if (column != null) {
+					String foreignTable = column.getReferenceTableName();
+					refValue = DB.getSQLValueString(null,
+							"SELECT " + foreignColumn + " FROM " + foreignTable + " WHERE " 
+							+ foreignTable + "_ID = ?", id);
+				}
+			}
+			return refValue;
+		}
+		return value;
 	}	//	get_ValueAsString
 
 	/**

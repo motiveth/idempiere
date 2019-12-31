@@ -83,15 +83,15 @@ ContextMenuListener, IZoomableEditor
     public final static String[] LISTENER_EVENTS = {Events.ON_SELECT};
     
     @SuppressWarnings("unused")
-	private static final CLogger logger;
+	protected static final CLogger logger;
     
     static
     {
         logger = CLogger.getCLogger(WTableDirEditor.class);
     }
     
-    private Lookup  lookup;
-    private Object oldValue;
+    protected Lookup  lookup;
+    protected Object oldValue;
 
     public static final String SHORT_LIST_EVENT = "SHORT_LIST";	// IDEMPIERE 90
     protected boolean onlyShortListItems;	// IDEMPIERE 90
@@ -105,7 +105,7 @@ ContextMenuListener, IZoomableEditor
         this(gridField.isAutocomplete() ? new EditorAutoComplete() : new EditorCombobox(), gridField);
     }
     
-    private WTableDirEditor(Component comp, GridField gridField)
+    public WTableDirEditor(Component comp, GridField gridField)
     {
         super(comp, gridField);
         ((ITableDirEditor)getComponent()).setEditor(this);
@@ -390,7 +390,7 @@ ContextMenuListener, IZoomableEditor
 		getComponent().setButtonVisible(readWrite);
 	}
 
-	private void refreshList()
+	protected void refreshList()
     {
     	if (getComponent().getItemCount() > 0)
     		getComponent().removeAllItems();
@@ -772,12 +772,12 @@ ContextMenuListener, IZoomableEditor
 		super.dynamicDisplay(ctx);
     }
 	
-	private interface ITableDirEditor {
+	public interface ITableDirEditor {
 		public void setEditor(WTableDirEditor editor);
 		public void cleanup();
 	}
 	
-	private static class EditorCombobox extends Combobox implements ITableDirEditor {
+	public static class EditorCombobox extends Combobox implements ITableDirEditor {
 		/**
 		 * generated serial id
 		 */

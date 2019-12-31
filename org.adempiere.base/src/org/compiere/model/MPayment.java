@@ -2661,6 +2661,7 @@ public class MPayment extends X_C_Payment
 		
 		//	Create Reversal
 		MPayment reversal = new MPayment (getCtx(), 0, get_TrxName());
+		reversal.setC_BankAccount_ID(this.getC_BankAccount_ID());
 		copyValues(this, reversal);
 		reversal.setClientOrg(this);
 		// reversal.setC_Order_ID(0); // IDEMPIERE-1764

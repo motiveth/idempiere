@@ -157,7 +157,7 @@ public final class ProcessUtil {
 
 		ProcessCall process = null;
 		//invoke process factory
-		process = Core.getProcess(className);
+		process = Core.getProcess(className, pi);
 
 		if (process == null) {
 			pi.setSummary("Failed to create new process instance for " + className, true);

@@ -45,6 +45,7 @@ import org.compiere.model.PaymentInterface;
 import org.compiere.model.PaymentProcessor;
 import org.compiere.model.StandardTaxProvider;
 import org.compiere.process.ProcessCall;
+import org.compiere.process.ProcessInfo;
 import org.compiere.util.CLogger;
 import org.compiere.util.PaymentExport;
 import org.compiere.util.ReplenishInterface;
@@ -124,15 +125,24 @@ public class Core {
 	}
 
 	/**
+	 * backward compatible
+	 * @param processId
+	 * @return
+	 */
+	public static ProcessCall getProcess(String processId) {
+		return getProcess (processId, null);
+	}
+
+	/**
 	 *
 	 * @param processId Java class name or equinox extension id
 	 * @return ProcessCall instance or null if processId not found
 	 */
-	public static ProcessCall getProcess(String processId) {
+	public static ProcessCall getProcess(String processId, ProcessInfo pi) {
 		List<IProcessFactory> factories = getProcessFactories();
 		if (factories != null && !factories.isEmpty()) {
 			for(IProcessFactory factory : factories) {
-				ProcessCall process = factory.newProcessInstance(processId);
+				ProcessCall process = factory.newProcessInstance(processId, pi);
 				if (process != null)
 					return process;
 			}

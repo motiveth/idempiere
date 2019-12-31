@@ -731,7 +731,7 @@ public class MStorageOnHand extends X_M_StorageOnHand
 			new Object[] {addition, Env.getAD_User_ID(Env.getCtx()), getM_Product_ID(), getM_Locator_ID(), getM_AttributeSetInstance_ID(), getDateMaterialPolicy()}, 
 			get_TrxName());
 		load(get_TrxName());
-		if (getQtyOnHand().signum() == -1) {
+		if (getQtyOnHand().signum() == -1 && addition.signum() < 0) { //IDEMPIERE-3410 issue 1
 			MWarehouse wh = MWarehouse.get(Env.getCtx(), getM_Warehouse_ID());
 			if (wh.isDisallowNegativeInv()) {
 				throw new NegativeInventoryDisallowedException(getCtx(), getM_Warehouse_ID(), getM_Product_ID(), getM_AttributeSetInstance_ID(), getM_Locator_ID(),

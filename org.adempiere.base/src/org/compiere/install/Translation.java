@@ -565,7 +565,7 @@ public class Translation implements IApplication
 			 * org.adempiere.process plugin become a dependency of
 			 * org.adempier.ui only for this commandline sync command.
 			 */
-			ProcessCall process = Core.getProcess("org.compiere.process.SynchronizeTerminology");
+			ProcessCall process = Core.getProcess("org.compiere.process.SynchronizeTerminology", pi);
 			process.startProcess(Env.getCtx(), pi, null);
 			StringBuilder msgout = new StringBuilder("Process=").append(pi.getTitle())
 					.append(" Error=").append(pi.isError()).append(" Summary=")

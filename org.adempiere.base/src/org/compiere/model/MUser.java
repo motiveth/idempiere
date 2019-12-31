@@ -561,19 +561,25 @@ public class MUser extends X_AD_User
 	}	//	setEMail
 	
 	/**
+	 * overload to keep old behavior
+	 * @return
+	 */
+	public InternetAddress getInternetAddress () {
+		return getInternetAddress (getEMail());
+	}
+	
+	/**
 	 * 	Convert EMail
 	 *	@return Valid Internet Address
 	 */
-	public InternetAddress getInternetAddress ()
+	public InternetAddress getInternetAddress (String email)
 	{
-		String email = getEMail();
 		if (email == null || email.length() == 0)
 			return null;
 		try
 		{
 			InternetAddress ia = new InternetAddress (email, true);
-			if (ia != null)
-				ia.validate();	//	throws AddressException
+			ia.validate();	//	throws AddressException
 			return ia;
 		}
 		catch (AddressException ex)
@@ -623,6 +629,10 @@ public class MUser extends X_AD_User
                 */
 	}	//	validateEmail
 	
+	public boolean isEMailValid(String email)
+	{
+		return validateEmail(getInternetAddress(email)) != null;
+	}
 	/**
 	 * 	Is the email valid
 	 * 	@return return true if email is valid (artificial check)
@@ -1049,6 +1059,27 @@ public class MUser extends X_AD_User
 	//	System.out.println ( MUser.get(Env.getCtx(), "SuperUser", "22") );
 	}	//	main	/* */
 
+	/**
+	 * IDEMPIERE-3255
+	 * User sent email from system, sometime identify is important, sometime not <br/>
+	 * Like case user sent mail to report error. this function will try to get any email by below priority<br/>
+	 * 1. Email setup at User record<br/>
+	 * 2. Email setup at Client record<br/>
+	 * 3. Email setup at System record<br/>
+	 */
+	public String getEMailUserAny ()
+	{
+		String userEmail = (String)get_Value(COLUMNNAME_EMail);
+		boolean isUserEmailMandatory = MSysConfig.getBooleanValue (MSysConfig.MAIL_USER_MANDATORY, true, Env.getAD_Client_ID(Env.getCtx()));
+		
+		if (!isUserEmailMandatory && userEmail == null){
+			userEmail = getEMailUser ();
+		}
+		
+		return userEmail;
+
+	}
+	
 	@Override
 	public String getEMailUser() {
 		// IDEMPIERE-722

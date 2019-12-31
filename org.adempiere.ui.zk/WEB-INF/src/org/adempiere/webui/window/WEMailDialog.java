@@ -442,13 +442,13 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 	{
 		m_from = newFrom;
 		if (newFrom == null 
-			|| !newFrom.isEMailValid() 
+			|| !newFrom.isEMailValid(newFrom.getEMailUserAny())
 			|| !newFrom.isCanSendEMail())
 		{
 			fFrom.setText("");
 		}
 		else
-			fFrom.setText(m_from.getEMail());
+			fFrom.setText(m_from.getEMailUserAny());
 	}	//	setFrom
 
 	/**

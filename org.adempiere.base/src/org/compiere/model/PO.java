@@ -1345,6 +1345,8 @@ public abstract class PO
 			for (int i = 0; i < m_IDs.length; i++)
 			{
 				Object oo = m_IDs[i];
+				if (oo == null)
+					continue;
 				if (oo instanceof Integer)
 					pstmt.setInt(i+1, ((Integer)m_IDs[i]).intValue());
 				else if (oo instanceof Boolean)
@@ -3123,7 +3125,13 @@ public abstract class PO
 		{
 			if (i != 0)
 				sb.append(" AND ");
-			sb.append(m_KeyColumns[i]).append("=");
+			if (m_IDs[i] == null){
+				sb.append(m_KeyColumns[i]).append(" IS NULL ");
+				continue;
+			}else{
+				sb.append(m_KeyColumns[i]).append("=");
+			}
+			
 			if (withValues)
 			{
 				if (m_KeyColumns[i].endsWith("_ID"))

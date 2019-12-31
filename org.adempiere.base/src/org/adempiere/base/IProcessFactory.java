@@ -14,6 +14,7 @@
 package org.adempiere.base;
 
 import org.compiere.process.ProcessCall;
+import org.compiere.process.ProcessInfo;
 
 /**
  * 
@@ -28,5 +29,36 @@ public interface IProcessFactory {
 	 * @return new process instance
 	 */
 	public ProcessCall newProcessInstance(String className);
+	
+	/**
+	 * for backward compatible, all implement will forward caller to {@link #newProcessInstance(String)} with pi = null
+	 * @param className
+	 * @param pi
+	 * @return
+	 */
+	public default ProcessCall newProcessInstance(String className, ProcessInfo pi) {
+		return newProcessInstance (className);
+	}
+	
+	/**
+	 * new interface for {@link IProcessFactory}, help developer focus to implement {@link #newProcessInstance(String, ProcessInfo)}
+	 * @author hieplq
+	 *
+	 */
+	public interface IProcessFactoryNew extends IProcessFactory{
+		/**
+		 * backward compatible, implement by default function. Extend hasn't care about this function.
+		 */
+		@Override
+		public default ProcessCall newProcessInstance(String className) {
+			return newProcessInstance (className, null);
+		}
+		
+		/**
+		 * take care, pi can be null
+		 */
+		@Override
+		public ProcessCall newProcessInstance(String className, ProcessInfo pi);
+	}
 	
 }

@@ -2761,6 +2761,9 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 		if (DisplayType.isID(field.getDisplayType()) && value instanceof Integer && ((Integer)value).intValue() < 0)
 			value = null;
 
+		if (DisplayType.isID(field.getDisplayType()) && value instanceof Integer && !MTable.isZeroIDTable(getTableName()) && ((Integer)value).intValue() < 1)
+			value = null;
+		
 		int col = m_mTable.findColumn(field.getColumnName());
 		m_mTable.setValueAt(value, m_currentRow, col, false);
 		//

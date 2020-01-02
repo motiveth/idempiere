@@ -58,8 +58,10 @@ public class ChartRendererServiceImpl implements IChartRendererService {
 		JFreeChart chart = builder.createIndicatorChart(model);
 		chart.setBackgroundPaint(model.chartBackground);
 		chart.setAntiAlias(true);
-		BufferedImage bi = chart.createBufferedImage(chartWidth, chartHeight, BufferedImage.TRANSLUCENT , null);
+		
 		try {
+			BufferedImage bi = chart.createBufferedImage(chartWidth, chartHeight, BufferedImage.TRANSLUCENT , null);
+			
 		    byte[] bytes = EncoderUtil.encode(bi, ImageFormat.PNG, true);
 
 		    AImage image = new AImage("", bytes);
@@ -70,6 +72,7 @@ public class ChartRendererServiceImpl implements IChartRendererService {
 		catch (Exception e)
 		{
 			e.printStackTrace();
+			log.log(Level.SEVERE, e.getMessage(), e.getCause());
 			return false;
 		}
 		return true;

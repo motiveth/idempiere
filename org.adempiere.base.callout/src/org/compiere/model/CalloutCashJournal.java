@@ -98,6 +98,7 @@ public class CalloutCashJournal extends CalloutEngine
 				mTab.setValue("DiscountAmt", DiscountAmt);
 				mTab.setValue("WriteOffAmt", Env.ZERO);
 				Env.setContext(ctx, WindowNo, "InvTotalAmt", PayAmt.toString());
+				return CalloutCashJournal.syncAmount (ctx, WindowNo, mTab, PayAmt.subtract(DiscountAmt), false);
 			}
 		}
 		catch (SQLException e)
@@ -153,9 +154,37 @@ public class CalloutCashJournal extends CalloutEngine
 		{
 			PayAmt = InvTotalAmt.subtract(DiscountAmt).subtract(WriteOffAmt);
 			mTab.setValue("Amount", PayAmt);
+			return CalloutCashJournal.syncAmount (ctx, WindowNo, mTab, PayAmt, false);
 		}
 
 		return "";
 	}	//	amounts
 
+	/**
+	 * at callout, set sync value between amount and input amount
+	 * @param ctx
+	 * @param WindowNo
+	 * @param cashLineTab
+	 * @param amount
+	 * @param isFromInput
+	 * @return
+	 */
+	public static String syncAmount (Properties ctx, int WindowNo, GridTab cashLineTab, BigDecimal amount, boolean isFromInput){
+		int cashId = Env.getContextAsInt(ctx, WindowNo, I_C_CashLine.COLUMNNAME_C_Cash_ID);
+		if (cashId == 0)
+			return null;
+		
+		MCash cash = new MCash(ctx, cashId, null);
+		
+		if (cash.checkNegate() == 0)
+			return null;
+		else if (cash.checkNegate() == -1)
+			cashLineTab.setValue(isFromInput?I_C_CashLine.COLUMNNAME_Amount:I_C_CashLine.COLUMNNAME_T_Amount, amount.negate());
+		else if (cash.checkNegate() == 1)
+			cashLineTab.setValue(isFromInput?I_C_CashLine.COLUMNNAME_Amount:I_C_CashLine.COLUMNNAME_T_Amount, amount);
+		else
+			return "don't support document type:" + cash.getC_DocType().getName();
+		
+		return null;
+	}
 }	//	CalloutCashJournal

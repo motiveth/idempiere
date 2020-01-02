@@ -103,6 +103,21 @@ public interface I_C_CashLine
 
 	public org.compiere.model.I_C_BankAccount getC_BankAccount() throws RuntimeException;
 
+    /** Column name C_BPartner_ID */
+    public static final String COLUMNNAME_C_BPartner_ID = "C_BPartner_ID";
+
+	/** Set Business Partner .
+	  * Identifies a Business Partner
+	  */
+	public void setC_BPartner_ID (int C_BPartner_ID);
+
+	/** Get Business Partner .
+	  * Identifies a Business Partner
+	  */
+	public int getC_BPartner_ID();
+
+	public org.compiere.model.I_C_BPartner getC_BPartner() throws RuntimeException;
+
     /** Column name C_Cash_ID */
     public static final String COLUMNNAME_C_Cash_ID = "C_Cash_ID";
 
@@ -184,6 +199,21 @@ public interface I_C_CashLine
 	public int getC_Invoice_ID();
 
 	public org.compiere.model.I_C_Invoice getC_Invoice() throws RuntimeException;
+
+    /** Column name C_Order_ID */
+    public static final String COLUMNNAME_C_Order_ID = "C_Order_ID";
+
+	/** Set Order.
+	  * Order
+	  */
+	public void setC_Order_ID (int C_Order_ID);
+
+	/** Get Order.
+	  * Order
+	  */
+	public int getC_Order_ID();
+
+	public org.compiere.model.I_C_Order getC_Order() throws RuntimeException;
 
     /** Column name C_Payment_ID */
     public static final String COLUMNNAME_C_Payment_ID = "C_Payment_ID";
@@ -293,6 +323,15 @@ public interface I_C_CashLine
 	  * The document has been processed
 	  */
 	public boolean isProcessed();
+
+    /** Column name T_Amount */
+    public static final String COLUMNNAME_T_Amount = "T_Amount";
+
+	/** Set Input Amount	  */
+	public void setT_Amount (BigDecimal T_Amount);
+
+	/** Get Input Amount	  */
+	public BigDecimal getT_Amount();
 
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";

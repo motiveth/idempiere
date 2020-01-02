@@ -859,4 +859,30 @@ public class MCash extends X_C_Cash implements DocAction
 			|| DOCSTATUS_Reversed.equals(ds);
 	}	//	isComplete
 	
+	/**
+	 * 0 mean doc type is null
+	 * -1 mean account payment
+	 * 1 mean account receive
+	 * 2 mean don't support
+	 * @return
+	 */
+	public int checkNegate(){
+		if (getC_DocType() == null)
+			return 0;
+		
+		String baseType = getC_DocType().getDocBaseType();
+		
+		if (baseType.equals(MDocType.DOCBASETYPE_APCreditMemo) || 
+				baseType.equals(MDocType.DOCBASETYPE_APInvoice) ||
+				baseType.equals(MDocType.DOCBASETYPE_APPayment)){
+			
+			return -1;
+		} else if (baseType.equals(MDocType.DOCBASETYPE_ARCreditMemo) || 
+				baseType.equals(MDocType.DOCBASETYPE_ARInvoice) ||
+				baseType.equals(MDocType.DOCBASETYPE_ARReceipt)){
+			return 1;
+		} else {
+			return 2;
+		}
+	}
 }	//	MCash

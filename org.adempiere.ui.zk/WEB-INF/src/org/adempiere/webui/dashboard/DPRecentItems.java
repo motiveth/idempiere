@@ -270,6 +270,7 @@ public class DPRecentItems extends DashboardPanel implements EventListener<Event
 			btnrecentItem.addEventListener(Events.ON_CLICK, this);
 			btnrecentItem.addEventListener(Events.ON_DROP, this);
 			btnrecentItem.setSclass("menu-href");
+			btnrecentItem.setTooltiptext(label);
 			ZKUpdateUtil.setHflex(btnrecentItem, "1");
 			
 			riShown++;

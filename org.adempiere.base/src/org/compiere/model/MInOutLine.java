@@ -29,6 +29,9 @@ import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
+import vn.hsv.idempiere.base.util.ITrackingProduct;
+import vn.hsv.idempiere.base.util.ModelUtil;
+
 /**
  * 	InOut Line
  *
@@ -39,7 +42,7 @@ import org.compiere.util.Util;
  *  		<li>BF [ 2784194 ] Check Warehouse-Locator conflict
  *  			https://sourceforge.net/tracker/?func=detail&aid=2784194&group_id=176962&atid=879332
  */
-public class MInOutLine extends X_M_InOutLine
+public class MInOutLine extends X_M_InOutLine implements ITrackingProduct
 {
 	/**
 	 *
@@ -305,7 +308,7 @@ public class MInOutLine extends X_M_InOutLine
 		}
 
 		//	Get existing Location
-		int M_Locator_ID = MStorageOnHand.getM_Locator_ID (getM_Warehouse_ID(),
+		int M_Locator_ID = MStorageOnHand.getM_Locator_ID (this, getM_Warehouse_ID(),
 				getM_Product_ID(), getM_AttributeSetInstance_ID(),
 				Qty, get_TrxName());
 		//	Get default Location
@@ -735,6 +738,53 @@ public class MInOutLine extends X_M_InOutLine
 
 		// inout has orderline and both has the same UOM
 		return true;
+	}
+
+	/* (non-Javadoc)
+	 * @see vn.hsv.idempiere.base.util.IOrderLineLink#getC_Order()
+	 */
+	@Override
+	public I_C_Order getOrderRef() {
+		return ModelUtil.implementGetOrderRef (this);
+	}
+
+	/* (non-Javadoc)
+	 * @see vn.hsv.idempiere.base.util.IOrderLineLink#getC_Order_ID()
+	 */
+	@Override
+	public int getOrderRefID() {
+		return ModelUtil.implementGetOrderRefID(this);
+	}
+
+	/* (non-Javadoc)
+	 * @see vn.hsv.idempiere.base.util.IOrderLineLink#getOrderLine()
+	 */
+	@Override
+	public I_C_OrderLine getOrderLineRef() {
+		return getM_InOut().isSOTrx()?getC_OrderLine():getC_OrderLine_Ref_OrderLine();
+	}
+
+	/* (non-Javadoc)
+	 * @see vn.hsv.idempiere.base.util.IOrderLineLink#getOrderLineRefID()
+	 */
+	@Override
+	public int getOrderLineRefID() {
+		return getM_InOut().isSOTrx()?getC_OrderLine_ID():getC_OrderLine_Ref_OrderLine_ID();
+	}
+
+	@Override
+	public int getAsiID() {
+		return getM_AttributeSetInstance_ID();
+	}
+
+	@Override
+	public I_M_AttributeSetInstance getAsi() {
+		return getM_AttributeSetInstance();
+	}
+
+	@Override
+	public Boolean isMatchRequirementASI() {
+		return ModelUtil.implementCheckMatchRequirement (getM_Product());
 	}
 
 }	//	MInOutLine

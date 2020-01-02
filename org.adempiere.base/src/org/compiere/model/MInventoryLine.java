@@ -26,6 +26,9 @@ import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
+import vn.hsv.idempiere.base.util.ITrackingProduct;
+import vn.hsv.idempiere.base.util.ModelUtil;
+
 /**
  *  Physical Inventory Line Model
  *
@@ -36,7 +39,7 @@ import org.compiere.util.Msg;
  * 			<li>BF [ 1817757 ] Error on saving MInventoryLine in a custom environment
  * 			<li>BF [ 1722982 ] Error with inventory when you enter count qty in negative
  */
-public class MInventoryLine extends X_M_InventoryLine 
+public class MInventoryLine extends X_M_InventoryLine implements ITrackingProduct
 {
 	/**
 	 * 
@@ -460,5 +463,52 @@ public class MInventoryLine extends X_M_InventoryLine
 	 */
 	public boolean isSOTrx() {
 		return getMovementQty().signum() < 0;
+	}
+
+	/* (non-Javadoc)
+	 * @see vn.hsv.idempiere.base.util.IOrderLineLink#getC_Order()
+	 */
+	@Override
+	public I_C_Order getOrderRef() {
+		return ModelUtil.implementGetOrderRef (this);
+	}
+
+	/* (non-Javadoc)
+	 * @see vn.hsv.idempiere.base.util.IOrderLineLink#getC_Order_ID()
+	 */
+	@Override
+	public int getOrderRefID() {
+		return ModelUtil.implementGetOrderRefID(this);
+	}
+
+	/* (non-Javadoc)
+	 * @see vn.hsv.idempiere.base.util.IOrderLineLink#getOrderLine()
+	 */
+	@Override
+	public I_C_OrderLine getOrderLineRef() {
+		return getC_OrderLine();
+	}
+
+	/* (non-Javadoc)
+	 * @see vn.hsv.idempiere.base.util.IOrderLineLink#getOrderLineRefID()
+	 */
+	@Override
+	public int getOrderLineRefID() {
+		return getC_OrderLine_ID();
+	}
+	
+	@Override
+	public int getAsiID() {
+		return getM_AttributeSetInstance_ID();
+	}
+
+	@Override
+	public I_M_AttributeSetInstance getAsi() {
+		return getM_AttributeSetInstance();
+	}
+
+	@Override
+	public Boolean isMatchRequirementASI() {
+		return ModelUtil.implementCheckMatchRequirement (getM_Product());
 	}
 }	//	MInventoryLine

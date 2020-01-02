@@ -44,6 +44,8 @@ import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.TimeUtil;
 
+import vn.hsv.idempiere.base.util.ModelUtil;
+
 /**
  *  Shipment Model
  *
@@ -88,6 +90,7 @@ public class MInOut extends X_M_InOut implements DocAction
 	{		
 		if (order == null)
 			throw new IllegalArgumentException("No Order");
+
 		//
 		if (!forceDelivery && DELIVERYRULE_CompleteLine.equals(order.getDeliveryRule()))
 		{
@@ -113,7 +116,7 @@ public class MInOut extends X_M_InOut implements DocAction
 			if (product != null && product.get_ID() != 0 && product.isStocked())
 			{
 				String MMPolicy = product.getMMPolicy();
-				storages = MStorageOnHand.getWarehouse (order.getCtx(), order.getM_Warehouse_ID(),
+				storages = MStorageOnHand.getWarehouse (oLines[i], order.getCtx(), order.getM_Warehouse_ID(),
 					oLines[i].getM_Product_ID(), oLines[i].getM_AttributeSetInstance_ID(),
 					minGuaranteeDate, MClient.MMPOLICY_FiFo.equals(MMPolicy), true, 0, trxName);
 			} else {
@@ -1391,7 +1394,7 @@ public class MInOut extends X_M_InOut implements DocAction
 								QtyMA = QtyMA.negate();
 	
 							//	Update Storage - see also VMatch.createMatchRecord
-							if (!MStorageOnHand.add(getCtx(), getM_Warehouse_ID(),
+							if (!MStorageOnHand.add(sLine, getCtx(), getM_Warehouse_ID(),
 								sLine.getM_Locator_ID(),
 								sLine.getM_Product_ID(),
 								ma.getM_AttributeSetInstance_ID(),
@@ -1409,6 +1412,7 @@ public class MInOut extends X_M_InOut implements DocAction
 								sLine.getM_Product_ID(), ma.getM_AttributeSetInstance_ID(),
 								QtyMA, getMovementDate(), get_TrxName());
 							mtrx.setM_InOutLine_ID(sLine.getM_InOutLine_ID());
+							ModelUtil.setOrderLinkForTransaction(sLine, mtrx);
 							if (!mtrx.save())
 							{
 								m_processMsg = "Could not create Material Transaction (MA) [" + product.getValue() + "]";
@@ -1439,7 +1443,7 @@ public class MInOut extends X_M_InOut implements DocAction
 					if (mtrx == null)
 					{
 						Timestamp dateMPolicy= null;
-						MStorageOnHand[] storages = MStorageOnHand.getWarehouse(getCtx(), 0,
+						MStorageOnHand[] storages = MStorageOnHand.getWarehouse(sLine, getCtx(), 0,
 								sLine.getM_Product_ID(), sLine.getM_AttributeSetInstance_ID(), null,
 								MClient.MMPOLICY_FiFo.equals(product.getMMPolicy()), false,
 								sLine.getM_Locator_ID(), get_TrxName());
@@ -1457,7 +1461,7 @@ public class MInOut extends X_M_InOut implements DocAction
 							dateMPolicy = getMovementDate();
 						
 						//	Fallback: Update Storage - see also VMatch.createMatchRecord
-						if (!MStorageOnHand.add(getCtx(), getM_Warehouse_ID(),
+						if (!MStorageOnHand.add(sLine, getCtx(), getM_Warehouse_ID(),
 							sLine.getM_Locator_ID(),
 							sLine.getM_Product_ID(),
 							sLine.getM_AttributeSetInstance_ID(),
@@ -1485,6 +1489,7 @@ public class MInOut extends X_M_InOut implements DocAction
 							sLine.getM_Product_ID(), sLine.getM_AttributeSetInstance_ID(),
 							Qty, getMovementDate(), get_TrxName());
 						mtrx.setM_InOutLine_ID(sLine.getM_InOutLine_ID());
+						ModelUtil.setOrderLinkForTransaction(sLine, mtrx);
 						if (!mtrx.save())
 						{
 							m_processMsg = CLogger.retrieveErrorString("Could not create Material Transaction [" + product.getValue() + "]");
@@ -1888,7 +1893,7 @@ public class MInOut extends X_M_InOut implements DocAction
 			{
 				String MMPolicy = product.getMMPolicy();
 				Timestamp minGuaranteeDate = getMovementDate();
-				MStorageOnHand[] storages = MStorageOnHand.getWarehouse(getCtx(), getM_Warehouse_ID(), line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+				MStorageOnHand[] storages = MStorageOnHand.getWarehouse(line, getCtx(), getM_Warehouse_ID(), line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
 						minGuaranteeDate, MClient.MMPOLICY_FiFo.equals(MMPolicy), true, line.getM_Locator_ID(), get_TrxName(), false);
 				BigDecimal qtyToDeliver = qty;
 				for (MStorageOnHand storage: storages)
@@ -1932,7 +1937,7 @@ public class MInOut extends X_M_InOut implements DocAction
 	}	//	checkMaterialPolicy
 
 	protected BigDecimal autoBalanceNegative(MInOutLine line, MProduct product,BigDecimal qtyToReceive) {
-		MStorageOnHand[] storages = MStorageOnHand.getWarehouseNegative(getCtx(), getM_Warehouse_ID(), line.getM_Product_ID(), 0,
+		MStorageOnHand[] storages = MStorageOnHand.getWarehouseNegative(line, getCtx(), getM_Warehouse_ID(), line.getM_Product_ID(), 0,
 				null, MClient.MMPOLICY_FiFo.equals(product.getMMPolicy()), line.getM_Locator_ID(), get_TrxName(), false);
 		
 		Timestamp dateMPolicy = null;

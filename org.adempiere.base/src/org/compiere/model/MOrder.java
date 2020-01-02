@@ -2184,7 +2184,7 @@ public class MOrder extends X_C_Order implements DocAction
 			//	Qty = Ordered - Delivered
 			BigDecimal MovementQty = oLine.getQtyOrdered().subtract(oLine.getQtyDelivered()); 
 			//	Location
-			int M_Locator_ID = MStorageOnHand.getM_Locator_ID (oLine.getM_Warehouse_ID(), 
+			int M_Locator_ID = MStorageOnHand.getM_Locator_ID (oLine, oLine.getM_Warehouse_ID(), 
 					oLine.getM_Product_ID(), oLine.getM_AttributeSetInstance_ID(), 
 					MovementQty, get_TrxName());
 			if (M_Locator_ID == 0)		//	Get default Location

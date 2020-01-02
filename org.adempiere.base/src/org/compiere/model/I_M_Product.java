@@ -529,6 +529,19 @@ public interface I_M_Product
 	  */
 	public int getLowLevel();
 
+    /** Column name MatchRequirement */
+    public static final String COLUMNNAME_MatchRequirement = "MatchRequirement";
+
+	/** Set Match Requirement.
+	  * Matching Requirement for Invoice
+	  */
+	public void setMatchRequirement (boolean MatchRequirement);
+
+	/** Get Match Requirement.
+	  * Matching Requirement for Invoice
+	  */
+	public boolean isMatchRequirement();
+
     /** Column name M_AttributeSet_ID */
     public static final String COLUMNNAME_M_AttributeSet_ID = "M_AttributeSet_ID";
 

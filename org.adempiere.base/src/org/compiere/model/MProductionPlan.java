@@ -15,11 +15,15 @@ import org.compiere.util.AdempiereUserError;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 
+import vn.hsv.idempiere.base.util.ITrackingProduct;
+import vn.hsv.idempiere.base.util.ModelUtil;
+import vn.hsv.idempiere.base.util.NullProviderOrderInfo;
+
 /**
  * @author hengsin
  *
  */
-public class MProductionPlan extends X_M_ProductionPlan {
+public class MProductionPlan extends X_M_ProductionPlan implements ITrackingProduct{
 
 	/**
 	 * generated serial id
@@ -103,7 +107,7 @@ public class MProductionPlan extends X_M_ProductionPlan {
 		line.setM_Locator_ID( getM_Locator_ID() );
 		line.setMovementQty( getProductionQty());
 		line.setPlannedQty(getProductionQty());
-		
+		line.setM_AttributeSetInstance_ID(getM_AttributeSetInstance_ID());
 		line.saveEx();
 		count++;
 		
@@ -203,8 +207,10 @@ public class MProductionPlan extends X_M_ProductionPlan {
 						{ 
 							MMPolicy = client.getMMPolicy();
 						}
-
-						storages = MStorageOnHand.getWarehouse(getCtx(), M_Warehouse_ID, BOMProduct_ID, 0, null,
+						if (String.valueOf(1).equals("1"))
+							throw new AdempiereException("not for you. please go aways or call hieplq@hasuvimex.vn");
+						
+						storages = MStorageOnHand.getWarehouse(NullProviderOrderInfo.NULL, getCtx(), M_Warehouse_ID, BOMProduct_ID, 0, null,
 								MProductCategory.MMPOLICY_FiFo.equals(MMPolicy), true, 0, get_TrxName());
 
 						MProductionLine BOMLine = null;
@@ -309,5 +315,52 @@ public class MProductionPlan extends X_M_ProductionPlan {
 	protected boolean beforeDelete() {
 		deleteLines(get_TrxName());
 		return true;
+	}
+
+	/* (non-Javadoc)
+	 * @see vn.hsv.idempiere.base.util.IOrderLineLink#getC_Order()
+	 */
+	@Override
+	public I_C_Order getOrderRef() {
+		return ModelUtil.implementGetOrderRef(this);
+	}
+
+	/* (non-Javadoc)
+	 * @see vn.hsv.idempiere.base.util.IOrderLineLink#getC_Order_ID()
+	 */
+	@Override
+	public int getOrderRefID() {
+		return ModelUtil.implementGetOrderRefID(this);
+	}
+
+	/* (non-Javadoc)
+	 * @see vn.hsv.idempiere.base.util.IOrderLineLink#getOrderLine()
+	 */
+	@Override
+	public I_C_OrderLine getOrderLineRef() {
+		return getC_OrderLine();
+	}
+
+	/* (non-Javadoc)
+	 * @see vn.hsv.idempiere.base.util.IOrderLineLink#getOrderLineRefID()
+	 */
+	@Override
+	public int getOrderLineRefID() {
+		return getC_OrderLine_ID();
+	}
+	
+	@Override
+	public int getAsiID() {
+		return getM_AttributeSetInstance_ID();
+	}
+
+	@Override
+	public I_M_AttributeSetInstance getAsi() {
+		return getM_AttributeSetInstance();
+	}
+
+	@Override
+	public Boolean isMatchRequirementASI() {
+		return ModelUtil.implementCheckMatchRequirement (getM_Product());
 	}
 }

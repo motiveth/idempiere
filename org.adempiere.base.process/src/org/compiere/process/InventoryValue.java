@@ -182,7 +182,8 @@ public class InventoryValue extends SvrProcess
 				.append(" INNER JOIN M_Locator l ON (l.M_Locator_ID=s.M_Locator_ID) ")
 				.append("WHERE iv.M_Product_ID=s.M_Product_ID")
 				.append(" AND iv.M_Warehouse_ID=l.M_Warehouse_ID")
-				.append(" AND iv.M_AttributeSetInstance_ID=s.M_AttributeSetInstance_ID) ")
+				.append(" AND iv.M_AttributeSetInstance_ID=s.M_AttributeSetInstance_ID ")
+				.append(" AND iv.C_OrderLine_ID=s.C_OrderLine_ID) ")
 			.append("WHERE AD_PInstance_ID=").append(getAD_PInstance_ID())
 			.append(" AND iv.M_AttributeSetInstance_ID<>0");
 		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
@@ -192,7 +193,8 @@ public class InventoryValue extends SvrProcess
 				.append("(SELECT SUM(QtyOnHand) FROM M_StorageOnHand s")
 				.append(" INNER JOIN M_Locator l ON (l.M_Locator_ID=s.M_Locator_ID) ")
 				.append("WHERE iv.M_Product_ID=s.M_Product_ID")
-				.append(" AND iv.M_Warehouse_ID=l.M_Warehouse_ID) ")
+				.append(" AND iv.M_Warehouse_ID=l.M_Warehouse_ID ")
+				.append(" AND iv.C_OrderLine_ID=s.C_OrderLine_ID) ")
 			.append("WHERE iv.AD_PInstance_ID=").append(getAD_PInstance_ID())
 			.append(" AND iv.M_AttributeSetInstance_ID=0");
 		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
@@ -207,7 +209,8 @@ public class InventoryValue extends SvrProcess
 				.append("WHERE t.M_Product_ID=iv.M_Product_ID")
 				.append(" AND t.M_AttributeSetInstance_ID=iv.M_AttributeSetInstance_ID")
 				.append(" AND t.MovementDate > iv.DateValue")
-				.append(" AND l.M_Warehouse_ID=iv.M_Warehouse_ID) ")
+				.append(" AND l.M_Warehouse_ID=iv.M_Warehouse_ID ")
+				.append(" AND iv.C_OrderLine_ID=t.C_OrderLine_ID) ")
 			.append("WHERE iv.M_AttributeSetInstance_ID<>0" )
 			.append(" AND iv.AD_PInstance_ID=").append(getAD_PInstance_ID());
 		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
@@ -220,7 +223,8 @@ public class InventoryValue extends SvrProcess
 				.append(" INNER JOIN M_Locator l ON (t.M_Locator_ID=l.M_Locator_ID) ")
 				.append("WHERE t.M_Product_ID=iv.M_Product_ID")
 				.append(" AND t.MovementDate > iv.DateValue")
-				.append(" AND l.M_Warehouse_ID=iv.M_Warehouse_ID) ")
+				.append(" AND l.M_Warehouse_ID=iv.M_Warehouse_ID ")
+				.append(" AND iv.C_OrderLine_ID=t.C_OrderLine_ID) ")
 			.append("WHERE iv.M_AttributeSetInstance_ID=0 ")
 			.append("AND iv.AD_PInstance_ID=").append(getAD_PInstance_ID());
 

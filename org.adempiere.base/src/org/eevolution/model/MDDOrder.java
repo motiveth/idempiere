@@ -845,6 +845,8 @@ public class MDDOrder extends X_DD_Order implements DocAction
 	 */
 	public void reserveStock (MDDOrderLine[] lines)
 	{
+		if (1 == 1)
+			throw new AdempiereException("hieplq:don't use distribute order");
 		BigDecimal Volume = Env.ZERO;
 		BigDecimal Weight = Env.ZERO;
 		
@@ -881,15 +883,16 @@ public class MDDOrder extends X_DD_Order implements DocAction
 					if (product.isStocked())
 					{
 						//	Update Storage
-						if (!MStorageOnHand.add(getCtx(), locator_to.getM_Warehouse_ID(), locator_to.getM_Locator_ID(), 
+						// not yet check logic
+						if (!MStorageOnHand.add(null, getCtx(), locator_to.getM_Warehouse_ID(), locator_to.getM_Locator_ID(), 
 							line.getM_Product_ID(), 
 							line.getM_AttributeSetInstance_ID(),
 							Env.ZERO,null, get_TrxName()))
 						{
 							throw new AdempiereException();
 						}
-						
-						if (!MStorageOnHand.add(getCtx(), locator_from.getM_Warehouse_ID(), locator_from.getM_Locator_ID(), 
+						// not yet check logic
+						if (!MStorageOnHand.add(null, getCtx(), locator_from.getM_Warehouse_ID(), locator_from.getM_Locator_ID(), 
 							line.getM_Product_ID(), 
 							line.getM_AttributeSetInstanceTo_ID(),
 							Env.ZERO,null, get_TrxName()))

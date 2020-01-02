@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.logging.Level;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MProject;
@@ -29,6 +30,8 @@ import org.compiere.model.MStorageOnHand;
 import org.compiere.model.MTimeExpense;
 import org.compiere.model.MTimeExpenseLine;
 import org.compiere.util.Env;
+
+import vn.hsv.idempiere.base.util.NullProviderOrderInfo;
 
 /**
  *  Issue to Project.
@@ -234,7 +237,10 @@ public class ProjectIssue extends SvrProcess
 			int M_Locator_ID = 0;
 		//	MProduct product = new MProduct (getCtx(), expenseLines[i].getM_Product_ID());
 		//	if (product.isStocked())
-				M_Locator_ID = MStorageOnHand.getM_Locator_ID(expense.getM_Warehouse_ID(), 
+			if ("1".equals(String.valueOf(1))){
+				throw new AdempiereException("something wrong, contact with hieplq@hasuvimex.vn");
+			}
+				M_Locator_ID = MStorageOnHand.getM_Locator_ID(NullProviderOrderInfo.NULL, expense.getM_Warehouse_ID(), 
 					expenseLines[i].getM_Product_ID(), 0, 	//	no ASI
 					expenseLines[i].getQty(), null);
 			if (M_Locator_ID == 0)	//	Service/Expense - get default (and fallback)

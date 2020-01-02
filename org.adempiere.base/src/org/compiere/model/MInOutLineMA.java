@@ -32,13 +32,16 @@ import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Util;
 
+import vn.hsv.idempiere.base.util.ITrackingProduct;
+import vn.hsv.idempiere.base.util.ModelUtil;
+
 /**
  *	Shipment Material Allocation
  *	
  *  @author Jorg Janke
  *  @version $Id: MInOutLineMA.java,v 1.3 2006/07/30 00:51:02 jjanke Exp $
  */
-public class MInOutLineMA extends X_M_InOutLineMA
+public class MInOutLineMA extends X_M_InOutLineMA implements ITrackingProduct
 {
 	/**
 	 * 
@@ -280,6 +283,41 @@ public class MInOutLineMA extends X_M_InOutLineMA
 		
 		return true;
 	} //beforeSave
+
+	@Override
+	public int getAsiID() {
+		return getM_AttributeSetInstance_ID();
+	}
+
+	@Override
+	public I_M_AttributeSetInstance getAsi() {
+		return getM_AttributeSetInstance();
+	}
+
+	@Override
+	public I_C_OrderLine getOrderLineRef() {
+		return ModelUtil.implementGetOrderLineRefFromParent((MInOutLine)getM_InOutLine());
+	}
+
+	@Override
+	public I_C_Order getOrderRef() {
+		return ModelUtil.implementGetOrderRefFromParent((MInOutLine)getM_InOutLine());
+	}
+
+	@Override
+	public int getOrderLineRefID() {
+		return ModelUtil.implementGetOrderLineRefIDFromParent((MInOutLine)getM_InOutLine());
+	}
+
+	@Override
+	public int getOrderRefID() {
+		return ModelUtil.implementGetOrderRefIDFromParent((MInOutLine)getM_InOutLine());
+	}
+
+	@Override
+	public Boolean isMatchRequirementASI() {
+		return ModelUtil.implementCheckMatchRequirement (getM_InOutLine().getM_Product());
+	}
 
 }	//	MInOutLineMA
 

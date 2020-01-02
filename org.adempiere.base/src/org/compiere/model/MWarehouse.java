@@ -232,7 +232,7 @@ public class MWarehouse extends X_M_Warehouse
 			String sql = "SELECT M_Product_ID FROM M_StorageOnHand s "+
 						 "WHERE s.M_Locator_ID IN (SELECT M_Locator_ID FROM M_Locator l " +
 						 				"WHERE M_Warehouse_ID=? )" +
-						 " GROUP BY M_Product_ID, M_Locator_ID, M_AttributeSetInstance_ID " +
+						 " GROUP BY M_Product_ID, M_Locator_ID, M_AttributeSetInstance_ID, C_OrderLine_ID " +
 						 " HAVING SUM(s.QtyOnHand) < 0 ";
 			
 			int prdid = DB.getSQLValueEx(get_TrxName(), sql, getM_Warehouse_ID());

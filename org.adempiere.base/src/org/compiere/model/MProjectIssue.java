@@ -159,6 +159,7 @@ public class MProjectIssue extends X_C_ProjectIssue
 		/** @todo Transaction */
 
 		//	**	Create Material Transactions **
+		// not yet use project, so don't update at here
 		MTransaction mTrx = new MTransaction (getCtx(), getAD_Org_ID(), 
 			MTransaction.MOVEMENTTYPE_WorkOrderPlus,
 			getM_Locator_ID(), getM_Product_ID(), getM_AttributeSetInstance_ID(),
@@ -175,6 +176,9 @@ public class MProjectIssue extends X_C_ProjectIssue
 				dateMPolicy = t;
 		}
 		
+		if (1 == 1)
+			throw new AdempiereException("hieplq:if use project, have to modify at there");
+		
 		boolean ok = true;
 		try
 		{
@@ -183,20 +187,20 @@ public class MProjectIssue extends X_C_ProjectIssue
 				String MMPolicy = product.getMMPolicy();
 				Timestamp minGuaranteeDate = getMovementDate();
 				int M_Warehouse_ID = getM_Locator_ID() > 0 ? getM_Locator().getM_Warehouse_ID() : getC_Project().getM_Warehouse_ID();
-				MStorageOnHand[] storages = MStorageOnHand.getWarehouse(getCtx(), M_Warehouse_ID, getM_Product_ID(), getM_AttributeSetInstance_ID(),
+				MStorageOnHand[] storages = MStorageOnHand.getWarehouse(null, getCtx(), M_Warehouse_ID, getM_Product_ID(), getM_AttributeSetInstance_ID(),
 						minGuaranteeDate, MClient.MMPOLICY_FiFo.equals(MMPolicy), true, getM_Locator_ID(), get_TrxName(), true);
 				BigDecimal qtyToIssue = getMovementQty();
 				for (MStorageOnHand storage: storages)
 				{
 					if (storage.getQtyOnHand().compareTo(qtyToIssue) >= 0)
 					{
-						storage.addQtyOnHand(qtyToIssue.negate());
+						storage.addQtyOnHand(null, qtyToIssue.negate());
 						qtyToIssue = BigDecimal.ZERO;
 					}
 					else
 					{
 						qtyToIssue = qtyToIssue.subtract(storage.getQtyOnHand());
-						storage.addQtyOnHand(storage.getQtyOnHand().negate());
+						storage.addQtyOnHand(null, storage.getQtyOnHand().negate());
 					}
 
 					if (qtyToIssue.signum() == 0)
@@ -204,14 +208,14 @@ public class MProjectIssue extends X_C_ProjectIssue
 				}
 				if (qtyToIssue.signum() > 0)
 				{
-					ok = MStorageOnHand.add(getCtx(), loc.getM_Warehouse_ID(), getM_Locator_ID(), 
+					ok = MStorageOnHand.add(null, getCtx(), loc.getM_Warehouse_ID(), getM_Locator_ID(), 
 							getM_Product_ID(), getM_AttributeSetInstance_ID(),
 							qtyToIssue.negate(),dateMPolicy, get_TrxName());
 				}
 			} 
 			else 
 			{
-				ok = MStorageOnHand.add(getCtx(), loc.getM_Warehouse_ID(), getM_Locator_ID(), 
+				ok = MStorageOnHand.add(null, getCtx(), loc.getM_Warehouse_ID(), getM_Locator_ID(), 
 						getM_Product_ID(), getM_AttributeSetInstance_ID(),
 						getMovementQty().negate(),dateMPolicy, get_TrxName());				
 			}

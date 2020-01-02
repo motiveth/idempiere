@@ -851,6 +851,30 @@ public class X_M_Product extends PO implements I_M_Product, I_Persistent
 		return ii.intValue();
 	}
 
+	/** Set Match Requirement.
+		@param MatchRequirement 
+		Matching Requirement for Invoice
+	  */
+	public void setMatchRequirement (boolean MatchRequirement)
+	{
+		set_Value (COLUMNNAME_MatchRequirement, Boolean.valueOf(MatchRequirement));
+	}
+
+	/** Get Match Requirement.
+		@return Matching Requirement for Invoice
+	  */
+	public boolean isMatchRequirement () 
+	{
+		Object oo = get_Value(COLUMNNAME_MatchRequirement);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
 	public org.compiere.model.I_M_AttributeSet getM_AttributeSet() throws RuntimeException
     {
 		return (org.compiere.model.I_M_AttributeSet)MTable.get(getCtx(), org.compiere.model.I_M_AttributeSet.Table_Name)

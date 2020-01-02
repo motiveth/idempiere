@@ -71,11 +71,11 @@ public class InventoryCountUpdate extends SvrProcess
 		//	Multiple Lines for one item
 		StringBuilder sql = new StringBuilder("UPDATE M_InventoryLine SET IsActive='N' ")
 			.append("WHERE M_Inventory_ID=").append(p_M_Inventory_ID)
-			.append(" AND (M_Product_ID, M_Locator_ID, M_AttributeSetInstance_ID) IN ")
-				.append("(SELECT M_Product_ID, M_Locator_ID, M_AttributeSetInstance_ID ")
+			.append(" AND (M_Product_ID, M_Locator_ID, M_AttributeSetInstance_ID, C_OrderLine_ID) IN ")
+				.append("(SELECT M_Product_ID, M_Locator_ID, M_AttributeSetInstance_ID, C_OrderLine_ID ")
 				.append("FROM M_InventoryLine ")
 				.append("WHERE M_Inventory_ID=").append(p_M_Inventory_ID)
-				.append(" GROUP BY M_Product_ID, M_Locator_ID, M_AttributeSetInstance_ID ")
+				.append(" GROUP BY M_Product_ID, M_Locator_ID, M_AttributeSetInstance_ID, C_OrderLine_ID ")
 				.append("HAVING COUNT(*) > 1)");
 		int multiple = DB.executeUpdate(sql.toString(), get_TrxName());
 		if (log.isLoggable(Level.INFO)) log.info("Multiple=" + multiple);
@@ -88,14 +88,14 @@ public class InventoryCountUpdate extends SvrProcess
 			.append("SET (QtyBook,QtyCount) = ")
 				.append("(SELECT SUM(QtyOnHand),SUM(QtyOnHand) FROM M_StorageOnHand s ")
 				.append("WHERE s.M_Product_ID=l.M_Product_ID AND s.M_Locator_ID=l.M_Locator_ID")
-				.append(" AND s.M_AttributeSetInstance_ID=l.M_AttributeSetInstance_ID),")
+				.append(" AND s.M_AttributeSetInstance_ID=l.M_AttributeSetInstance_ID, s.C_OrderLine_ID = l.C_OrderLine_ID),")
 			.append(" Updated=getDate(),")
 			.append(" UpdatedBy=").append(getAD_User_ID())
 			//
 			.append(" WHERE M_Inventory_ID=").append(p_M_Inventory_ID)
 			.append(" AND EXISTS (SELECT * FROM M_StorageOnHand s ")
 				.append("WHERE s.M_Product_ID=l.M_Product_ID AND s.M_Locator_ID=l.M_Locator_ID")
-				.append(" AND s.M_AttributeSetInstance_ID=l.M_AttributeSetInstance_ID)");
+				.append(" AND s.M_AttributeSetInstance_ID=l.M_AttributeSetInstance_ID AND s.C_OrderLine_ID = l.C_OrderLine_ID)");
 		int no = DB.executeUpdate(sql.toString(), get_TrxName());
 		if (log.isLoggable(Level.INFO)) log.info("Update with ASI=" + no);
 

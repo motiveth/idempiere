@@ -414,7 +414,8 @@ public class MMovementConfirm extends X_M_MovementConfirm implements DocAction
 				}
 			}
 		}	//	for all lines
-		
+		move.setProcessed(true);
+		move.saveEx(get_TrxName());
 		//complete movement
 		setProcessed(true);
 		saveEx();

@@ -801,7 +801,12 @@ public class CalloutOrder extends CalloutEngine
 		//	}
 
 
-		if (Env.isSOTrx(ctx, WindowNo))
+		int docTypeId =  Env.getContextAsInt(ctx, WindowNo, MOrder.COLUMNNAME_C_DocTypeTarget_ID, true);
+		MDocType dt = MDocType.get(ctx, docTypeId);
+		String docSubTypeSO = dt.getDocSubTypeSO();
+		
+		if (Env.isSOTrx(ctx, WindowNo) && 
+				(docSubTypeSO.equals(MDocType.DOCSUBTYPESO_OnCreditOrder) || docSubTypeSO.equals(MDocType.DOCSUBTYPESO_WarehouseOrder)))
 		{
 			MProduct product = MProduct.get (ctx, M_Product_ID.intValue());
 			if (product.isStocked() && Env.getContext(ctx, WindowNo, "IsDropShip").equals("N"))
@@ -1292,10 +1297,15 @@ public class CalloutOrder extends CalloutEngine
 			QtyOrdered = (BigDecimal)mTab.getValue("QtyOrdered");
 		}
 
+		int docTypeId =  Env.getContextAsInt(ctx, WindowNo, MOrder.COLUMNNAME_C_DocTypeTarget_ID, true);
+		MDocType dt = MDocType.get(ctx, docTypeId);
+		String docSubTypeSO = dt.getDocSubTypeSO();
+
 		//	Storage
 		if (M_Product_ID != 0
 			&& Env.isSOTrx(ctx, WindowNo)
-			&& QtyOrdered.signum() > 0)		//	no negative (returns)
+			&& QtyOrdered.signum() > 0 && 
+			(docSubTypeSO.equals(MDocType.DOCSUBTYPESO_OnCreditOrder) || docSubTypeSO.equals(MDocType.DOCSUBTYPESO_WarehouseOrder)))		//	no negative (returns)
 		{
 			MProduct product = MProduct.get (ctx, M_Product_ID);
 			if (product.isStocked() && Env.getContext(ctx, WindowNo, "IsDropShip").equals("N"))

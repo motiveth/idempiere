@@ -299,6 +299,7 @@ public class WCreateFromInvoiceUI extends CreateFromInvoice implements EventList
 		int AD_Column_ID = COLUMN_C_INVOICE_C_BPARTNER_ID;        //  C_Invoice.C_BPartner_ID
 		MLookup lookup = MLookupFactory.get (Env.getCtx(), p_WindowNo, 0, AD_Column_ID, DisplayType.Search);
 		bPartnerField = new WSearchEditor ("C_BPartner_ID", true, false, true, lookup);
+		bPartnerField.setReadWrite(false);
 		//
 		int C_BPartner_ID = Env.getContextAsInt(Env.getCtx(), p_WindowNo, "C_BPartner_ID");
 		bPartnerField.setValue(Integer.valueOf(C_BPartner_ID));

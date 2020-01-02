@@ -1392,8 +1392,18 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 
 		try
 		{
-			if (m_printFormat != null && m_printFormat.getJasperProcess_ID() > 0) {
-				ProcessInfo pi = new ProcessInfo ("", m_printFormat.getJasperProcess_ID(), m_printFormat.getAD_Table_ID(), m_info.getRecord_ID());
+			
+			int processId = 0;
+			int tableId = m_printFormat.getAD_Table_ID();
+			if (getPrintInfo() != null && getPrintInfo().isUseWindowPrint()) {
+				processId = Env.getTabProcessForRecord (getPrintInfo().getAD_Table_ID(), getPrintInfo().getRecord_ID());
+				tableId = getPrintInfo().getAD_Table_ID();
+			}else if (m_printFormat != null && m_printFormat.getJasperProcess_ID() > 0) {
+				processId = m_printFormat.getJasperProcess_ID();
+			}
+			
+			if (processId > 0) {
+				ProcessInfo pi = new ProcessInfo ("", processId, tableId, m_info.getRecord_ID());
 				pi.setIsBatch(true);
 				pi.setPDFFileName(fileName);
 				ServerProcessCtl.process(pi, (m_trxName == null ? null : Trx.get(m_trxName, false)));

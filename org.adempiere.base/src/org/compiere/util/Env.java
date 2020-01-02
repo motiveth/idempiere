@@ -46,6 +46,8 @@ import org.adempiere.util.ServerContext;
 import org.adempiere.util.ServerContextProvider;
 import org.compiere.Adempiere;
 import org.compiere.db.CConnection;
+import org.compiere.model.GridTab;
+import org.compiere.model.GridWindow;
 import org.compiere.model.GridWindowVO;
 import org.compiere.model.I_AD_Window;
 import org.compiere.model.MClient;
@@ -2071,7 +2073,34 @@ public final class Env
 		return AD_Window_ID;
 	}
 	
-	
+	public static int getTabProcessForRecord (int tableId, int recordId) {
+		int windowId = getZoomWindowID (tableId, recordId);
+		if (windowId <= 0) {
+			return -1;
+		}
+		
+		GridWindow window = GridWindow.get(Env.getCtx(), -1, windowId);
+		if (window == null || window.getTabCount() == 0)
+			return -1;
+		
+		String tableName = MTable.get(Env.getCtx(), tableId).getTableName();
+		int size = window.getTabCount();
+		GridTab gTab = null;
+		for(int i = 0; i < size; i++)
+		{
+			if (window.getTab(i).getTableName().equals(tableName))
+			{
+				gTab = window.getTab(i);
+				break;
+			}
+		}
+		
+		if (gTab != null) {
+			return gTab.getAD_Process_ID();
+		}
+		
+		return -1;
+	}
 	
 	/**************************************************************************
 	 *  Static Variables

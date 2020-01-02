@@ -20,6 +20,7 @@ import org.compiere.util.AdempiereUserError;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
 import vn.hsv.idempiere.base.util.ITrackingProduct;
@@ -925,6 +926,23 @@ public class MProduction extends X_M_Production implements DocAction, ITrackingP
 				setIsUseProductionPlan(true);
 			}
 		}
+		
+		if (getM_AttributeSetInstance_ID() == 0)
+		{
+			MProduct product = MProduct.get(getCtx(), getM_Product_ID());
+			if (product != null && product.isASIMandatory(false))
+			{
+				if(product.getAttributeSet()==null){
+					log.saveError("NoAttributeSet", product.getValue());
+					return false;
+				}
+				if (! product.getAttributeSet().excludeTableEntry(MProduction.Table_ID, false)) {
+					log.saveError("FillMandatory", Msg.getElement(getCtx(), COLUMNNAME_M_AttributeSetInstance_ID));
+					return false;
+				}
+			}
+		}
+		
 		return true;
 	}
 	

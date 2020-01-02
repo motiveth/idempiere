@@ -13,6 +13,7 @@ import java.util.logging.Level;
 import org.adempiere.exceptions.AdempiereException;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
 import vn.hsv.idempiere.base.util.IOrderLineLink;
@@ -368,6 +369,22 @@ public class MProductionLine extends X_M_ProductionLine implements ITrackingProd
 	@Override
 	protected boolean beforeSave(boolean newRecord) 
 	{
+		if (getM_AttributeSetInstance_ID() == 0)
+		{
+			MProduct product = MProduct.get(getCtx(), getM_Product_ID());
+			if (product != null && product.isASIMandatory(false))
+			{
+				if(product.getAttributeSet()==null){
+					log.saveError("NoAttributeSet", product.getValue());
+					return false;
+				}
+				if (! product.getAttributeSet().excludeTableEntry(MProduction.Table_ID, false)) {
+					log.saveError("FillMandatory", Msg.getElement(getCtx(), COLUMNNAME_M_AttributeSetInstance_ID));
+					return false;
+				}
+			}
+		}
+		
 		if (productionParent == null && getM_Production_ID() > 0)
 			productionParent = new MProduction(getCtx(), getM_Production_ID(), get_TrxName());
 

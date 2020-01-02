@@ -100,7 +100,7 @@ public abstract class CreateFromInvoice extends CreateFrom
 				+ "(SELECT sl.M_InOut_ID FROM M_InOutLine sl");
 			if(!isSOTrx)
 				sql.append(" LEFT OUTER JOIN M_MatchInv mi ON (sl.M_InOutLine_ID=mi.M_InOutLine_ID) "
-					+ " JOIN M_InOut s2 ON (sl.M_InOut_ID=s2.M_InOut_ID) "
+					+ " JOIN M_InOut s2 ON (sl.M_InOut_ID=s2.M_InOut_ID AND sl.QtyEntered <> 0 and sl.MovementQty <> 0) "
 					+ " WHERE s2.C_BPartner_ID=? AND s2.IsSOTrx=? AND s2.DocStatus IN ('CL','CO') "
 					+ " GROUP BY sl.M_InOut_ID,sl.MovementQty,mi.M_InOutLine_ID"
 					+ " HAVING (sl.MovementQty<>SUM(mi.Qty) AND mi.M_InOutLine_ID IS NOT NULL)"

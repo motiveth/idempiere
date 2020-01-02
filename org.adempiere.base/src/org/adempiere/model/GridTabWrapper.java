@@ -65,6 +65,9 @@ public class GridTabWrapper implements InvocationHandler
 		if (methodName.startsWith("set") && args.length == 1)
 		{
 			String propertyName = methodName.substring(3);
+			if (propertyName.endsWith("_ID") && args[0] != null && (int)args[0] == 0 && !MTable.isZeroIDTable (m_gridTab.getTableName())){
+				args[0] = null;
+			}
 			m_gridTab.setValue(propertyName, args[0]);
 			// TODO: handle GridTab.setValue returning error  
 			return null;

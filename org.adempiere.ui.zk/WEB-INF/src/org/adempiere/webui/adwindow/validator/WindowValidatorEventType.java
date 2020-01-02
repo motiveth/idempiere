@@ -1,6 +1,7 @@
 package org.adempiere.webui.adwindow.validator;
 
 public enum WindowValidatorEventType {
+	CHANGED_RECORD("changedRecord"),
 	BEFORE_IGNORE("beforeIgnore"),
 	AFTER_IGNORE("afterIgnore"),
 	BEFORE_NEW("beforeNew"),

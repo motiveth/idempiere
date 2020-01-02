@@ -46,6 +46,7 @@ public class InOutCreateInvoice extends SvrProcess
 	/* Document No					*/
 	private String	p_InvoiceDocumentNo = null;
 	
+	private boolean p_IsDateSameReceipt = false;
 	/**
 	 *  Prepare - e.g., get Parameters.
 	 */
@@ -61,6 +62,8 @@ public class InOutCreateInvoice extends SvrProcess
 				p_M_PriceList_ID = para[i].getParameterAsInt();
 			else if (name.equals("InvoiceDocumentNo"))
 				p_InvoiceDocumentNo = (String)para[i].getParameter();
+			else if (name.equals("isDateSameReceipt"))
+				p_IsDateSameReceipt = para[i].getParameterAsBoolean();
 			else
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 		}
@@ -87,11 +90,18 @@ public class InOutCreateInvoice extends SvrProcess
 			throw new IllegalArgumentException("Shipment not completed");
 		
 		MInvoice invoice = new MInvoice (ship, null);
+
+		if (p_IsDateSameReceipt) {
+			invoice.setDateInvoiced(ship.getMovementDate());
+			invoice.setDateAcct(ship.getDateAcct());
+		}
+
 		// Should not override pricelist for RMA
 		if (p_M_PriceList_ID != 0 && ship.getM_RMA_ID() == 0)
 			invoice.setM_PriceList_ID(p_M_PriceList_ID);
 		if (p_InvoiceDocumentNo != null && p_InvoiceDocumentNo.length() > 0)
 			invoice.setDocumentNo(p_InvoiceDocumentNo);
+		
 		if (!invoice.save())
 			throw new IllegalArgumentException("Cannot save Invoice");
 		MInOutLine[] shipLines = ship.getLines(false);

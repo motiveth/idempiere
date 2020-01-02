@@ -150,9 +150,11 @@ public final class ProcessUtil {
 	public static boolean startJavaProcess(Properties ctx, ProcessInfo pi, Trx trx, boolean managedTrx, IProcessUI processMonitor) {
 		String className = pi.getClassName();
 		if (className == null) {
-			MProcess proc = new MProcess(ctx, pi.getAD_Process_ID(), trx.getTrxName());
+			MProcess proc = new MProcess(ctx, pi.getAD_Process_ID(), trx == null?null : trx.getTrxName());
 			if (proc.getJasperReport() != null)
 				className = JASPER_STARTER_CLASS;
+			else
+				className = proc.getClassname();
 		}
 
 		ProcessCall process = null;

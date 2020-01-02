@@ -368,7 +368,7 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 		if (!m_productWindow && as.isLot())
 		{
 			Row row = new Row();
-			row.setParent(rows);
+			//row.setParent(rows);
 			m_row++;
 			Label label = new Label (Msg.translate(Env.getCtx(), "Lot"));
 			row.appendChild(label);

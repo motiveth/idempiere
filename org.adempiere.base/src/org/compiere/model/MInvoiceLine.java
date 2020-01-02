@@ -146,6 +146,12 @@ public class MInvoiceLine extends X_C_InvoiceLine
 		setClientOrg(invoice.getAD_Client_ID(), invoice.getAD_Org_ID());
 		setC_Invoice_ID (invoice.getC_Invoice_ID());
 		setInvoice(invoice);
+		setC_Project_ID(invoice.getC_Project_ID());
+		setC_Activity_ID(invoice.getC_Activity_ID());
+		setC_Campaign_ID(invoice.getC_Campaign_ID());
+		setAD_OrgTrx_ID(invoice.getAD_OrgTrx_ID());
+		setUser1_ID(invoice.getUser1_ID());
+		setUser2_ID(invoice.getUser2_ID());
 	}	//	MInvoiceLine
 
 

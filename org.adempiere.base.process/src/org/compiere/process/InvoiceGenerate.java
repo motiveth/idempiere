@@ -444,7 +444,8 @@ public class InvoiceGenerate extends SvrProcess
 				.append(" - ").append(format.format(ship.getMovementDate()));
 			m_ship = ship;
 			//
-			MInvoiceLine line = new MInvoiceLine (m_invoice);
+			// hsv not need reference description
+			/*MInvoiceLine line = new MInvoiceLine (m_invoice);
 			line.setIsDescription(true);
 			line.setDescription(reference.toString());
 			line.setLine(m_line + sLine.getLine() - 2);
@@ -460,7 +461,7 @@ public class InvoiceGenerate extends SvrProcess
 				line.setLine(m_line + sLine.getLine() - 1);
 				if (!line.save())
 					throw new IllegalStateException("Could not create Invoice Comment Line 2 (sh)");
-			}
+			}*/
 		}
 		//	
 		MInvoiceLine line = new MInvoiceLine (m_invoice);

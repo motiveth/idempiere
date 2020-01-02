@@ -23,6 +23,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.logging.Level;
 
 import javax.servlet.http.HttpSession;
 
@@ -35,6 +36,7 @@ import org.compiere.model.I_AD_SysConfig;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.PO;
 import org.compiere.model.X_AD_SysConfig;
+import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.compiere.util.EnvUpdateEventInfo;
 import org.compiere.util.IEnvUpdateListener;
@@ -55,6 +57,7 @@ public class DefaultWebAppInit implements WebAppInit, IEnvUpdateListener {
 
 	private static SystemConfigHandler systemConfigChangeHandler;	
 	protected WebApp  webApp = null;
+	protected static CLogger log = CLogger.getCLogger (DefaultWebAppInit.class);
 	
 	/**
 	 * list listener handle update Env event.
@@ -373,6 +376,13 @@ public class DefaultWebAppInit implements WebAppInit, IEnvUpdateListener {
 			WebEnvUpdateListener realListener = listener.get();
 			if (realListener != null)
 				realListener.updateEnv(info);
+			else
+				try{
+					iterator.remove();
+				}catch (Exception ex){
+					log.log(Level.SEVERE, ex.getMessage(), ex.getCause());
+				}
+				
 		}
 		
 	}

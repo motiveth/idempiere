@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.webui.event.TableValueChangeEvent;
 import org.adempiere.webui.event.TableValueChangeListener;
 import org.adempiere.webui.event.WTableModelEvent;
@@ -408,7 +409,13 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
         }
 
         sql.append( " FROM ").append(from);
-        sql.append(" WHERE ").append(where);
+        if (addAccessSQL && where == null){
+        	throw new AdempiereException("IDEMPIERE-2989"); 
+        }else if (!addAccessSQL && where == null){
+        	//do nothing, sql is full it's case of //hsv:select again a attribute select already create
+        }else{
+        	sql.append(" WHERE ").append(where);
+        }
 
         if (from.length() == 0)
         {

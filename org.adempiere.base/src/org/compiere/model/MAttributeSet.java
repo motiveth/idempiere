@@ -112,22 +112,27 @@ public class MAttributeSet extends X_M_AttributeSet
 	/** Serial No create Exclude				*/
 	private X_M_SerNoCtlExclude[]	m_excludeSerNos = null;
 
+	public MAttribute[] getMAttributes (boolean instanceAttributes){
+		return getMAttributes(instanceAttributes, false);
+	}
 	/**
 	 * 	Get Attribute Array
 	 * 	@param instanceAttributes true if for instance
 	 *	@return instance or product attribute array
 	 */
-	public MAttribute[] getMAttributes (boolean instanceAttributes)
+	public MAttribute[] getMAttributes (boolean instanceAttributes, boolean isOrderById)
 	{
 		if ((m_instanceAttributes == null && instanceAttributes)
 			|| m_productAttributes == null && !instanceAttributes)
 		{
+			String orderClause = isOrderById?"ma.M_Attribute_ID":"mau.SeqNo";
+			
 			String sql = "SELECT mau.M_Attribute_ID "
 				+ "FROM M_AttributeUse mau"
 				+ " INNER JOIN M_Attribute ma ON (mau.M_Attribute_ID=ma.M_Attribute_ID) "
 				+ "WHERE mau.IsActive='Y' AND ma.IsActive='Y'"
 				+ " AND mau.M_AttributeSet_ID=? AND ma.IsInstanceAttribute=? "	//	#1,2
-				+ "ORDER BY mau.SeqNo";
+				+ "ORDER BY " + orderClause;
 			ArrayList<MAttribute> list = new ArrayList<MAttribute>();
 			PreparedStatement pstmt = null;
 			ResultSet rs = null;

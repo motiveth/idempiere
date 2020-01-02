@@ -94,7 +94,7 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 	 * 
 	 */
 	private static final long serialVersionUID = -7810825026970615029L;
-
+	
 	/**
 	 *	Product Attribute Instance Dialog
 	 *	@param M_AttributeSetInstance_ID Product Attribute Set Instance id
@@ -184,17 +184,17 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 //	private VString fieldLotString = new VString ("Lot", false, false, true, 20, 20, null, null);
 	private Textbox fieldLotString = new Textbox();
 	private Listbox fieldLot = new Listbox();
-	private Button bLot = new Button(Msg.getMsg (Env.getCtx(), "New"));
+	private Button bLot = new Button(Msg.getMsg (Env.getCtx(), "New Lot"));
 	//	Lot Popup
 	Menupopup 					popupMenu = new Menupopup();
 	private Menuitem 			mZoom;
 	//	Ser No
 	private Textbox fieldSerNo = new Textbox();
-	private Button bSerNo = new Button(Msg.getMsg (Env.getCtx(), "New"));
+	private Button bSerNo = new Button(Msg.getMsg (Env.getCtx(), "New Seria No"));
 	//	Date
 	private Datebox fieldGuaranteeDate = new Datebox();
 	//
-	private Textbox fieldDescription = new Textbox(); //TODO: set length to 20
+	//private Textbox fieldDescription = new Textbox(); //TODO: set length to 20
 	//
 	private Borderlayout mainLayout = new Borderlayout();
 	private Panel centerPanel = new Panel();
@@ -344,10 +344,10 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 			Row row = new Row();
 			
 			//	New/Edit - Selection
-			if (m_M_AttributeSetInstance_ID == 0)		//	new
+			/*if (m_M_AttributeSetInstance_ID == 0)		//	new
 				cbNewEdit.setLabel(Msg.getMsg(Env.getCtx(), "NewRecord"));
-			else
-				cbNewEdit.setLabel(Msg.getMsg(Env.getCtx(), "EditRecord"));
+			else*/
+			cbNewEdit.setLabel(Msg.getMsg(Env.getCtx(), "EditRecord"));
 			cbNewEdit.addEventListener(Events.ON_CHECK, this);
 			row.appendChild(cbNewEdit);
 			bSelect.setLabel(Msg.getMsg(Env.getCtx(), "SelectExisting"));
@@ -492,7 +492,7 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 		}
 		else
 		{
-			cbNewEdit.setSelected(false);
+			//cbNewEdit.setSelected(false);
 			cbNewEdit.setEnabled(m_M_AttributeSetInstance_ID > 0);
 			bNewRecord.setEnabled(m_M_AttributeSetInstance_ID > 0);
 			boolean rw = m_M_AttributeSetInstance_ID == 0;
@@ -509,7 +509,7 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 					((InputElement)editor).setReadonly(!rw);
 			}
 		}
-
+/*
 		//	Attrribute Set Instance Description
 		Label label = new Label (Msg.translate(Env.getCtx(), "Description"));
 //		label.setLabelFor(fieldDescription);
@@ -520,7 +520,7 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 		row.appendChild(label);
 		row.appendChild(fieldDescription);
 		ZKUpdateUtil.setHflex(fieldDescription, "1");
-		
+		*/
 		return true;
 	}	//	initAttribute
 
@@ -598,7 +598,7 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 				m_editors.add (editor);
 		}
 	}	//	addAttributeLine
-
+	
 	private void updateAttributeEditor(MAttribute attribute, int index) {
 		if (MAttribute.ATTRIBUTEVALUETYPE_List.equals(attribute.getAttributeValueType()))
 		{
@@ -680,8 +680,8 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 		//
 		Env.setContext(Env.getCtx(), m_WindowNoParent, Env.TAB_INFO, m_columnName, 
 			String.valueOf(m_M_AttributeSetInstance_ID));
-		Env.setContext(Env.getCtx(), m_WindowNoParent, Env.TAB_INFO, "M_Locator_ID", 
-			String.valueOf(m_M_Locator_ID));
+		/*Env.setContext(Env.getCtx(), m_WindowNoParent, Env.TAB_INFO, "M_Locator_ID", 
+			String.valueOf(m_M_Locator_ID));*/
 		//
 		this.detach();
 	}	//	dispose
@@ -824,7 +824,7 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 				((InputElement)editor).setText(null);
 			}
 		}
-		fieldDescription.setText("");
+		//fieldDescription.setText("");
 	}
 
 	private void cmd_edit() {
@@ -898,7 +898,7 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 		}
 		//		
 		final WPAttributeInstance pai = new WPAttributeInstance(title, 
-			M_Warehouse_ID, M_Locator_ID, m_M_Product_ID, m_C_BPartner_ID);
+			M_Warehouse_ID, M_Locator_ID, m_M_Product_ID, m_C_BPartner_ID, m_WindowNoParent);
 		pai.addEventListener(DialogEvents.ON_WINDOW_CLOSE, new EventListener<Event>() {
 
 			@Override
@@ -1027,6 +1027,18 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 			m_changed = true;
 		}	//	GuaranteeDate
 
+		// load if exists
+		MAttribute[] attributes = as.getMAttributes(!m_productWindow);
+		String sqlQueryExitsAsi = buildQureyExitsAsi(attributes, m_editors);
+		int exitsAsiID = DB.getSQLValueEx(null, sqlQueryExitsAsi, as.get_ID());
+		if (exitsAsiID > 0){
+			int oldAsiId = m_masi.get_ID();
+			m_masi = MAttributeSetInstance.get(Env.getCtx(), exitsAsiID, m_M_Product_ID);
+			m_M_AttributeSetInstance_ID = m_masi.getM_AttributeSetInstance_ID ();
+			m_M_AttributeSetInstanceName = m_masi.getDescription();
+			m_changed = oldAsiId != m_masi.get_ID();
+			return true;
+		}
 		
 		//	***	Save Attributes ***
 		//	New Instance
@@ -1039,7 +1051,7 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 
 		//	Save Instance Attributes
 	
-		MAttribute[] attributes = as.getMAttributes(!m_productWindow);
+		//MAttribute[] attributes = as.getMAttributes(!m_productWindow);
 		MAttribute.set_TrxName(attributes, trxName);
 		for (int i = 0; i < attributes.length; i++)
 		{
@@ -1078,6 +1090,8 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 			{
 				Textbox editor = (Textbox)m_editors.get(i);
 				String value = editor.getText();
+				if (value != null && value.trim().length() == 0)
+					value = null;
 				if (log.isLoggable(Level.FINE)) log.fine(attributes[i].getName() + "=" + value);
 				if (attributes[i].isMandatory() && (value == null || value.length() == 0))
 					mandatory += " - " + attributes[i].getName();
@@ -1119,6 +1133,140 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 		return true;
 	}	//	saveSelection
 
+	/**
+	 * build to template:
+	 * SELECT 
+			ati.m_attributesetinstance_id 
+		FROM
+			(SELECT m_attributesetinstance_id
+				FROM m_attributeinstance  
+				WHERE (m_attributevalue_id = 106 or value = 'from physical inventory')
+				GROUP BY m_attributesetinstance_id
+				HAVING COUNT (m_attributesetinstance_id) = 2
+			)AS ati INNER JOIN m_attributesetinstance atsi
+			ON ati.m_attributesetinstance_id = atsi.m_attributesetinstance_id
+		WHERE 
+			m_attributeset_id = ?
+
+	 * @param attributes
+	 * @param m_editors
+	 * @return
+	 */
+	protected String buildQureyExitsAsi (MAttribute[] attributes, ArrayList<HtmlBasedComponent> m_editors){
+		StringBuilder sqlSelectExitsAts = new StringBuilder();
+		
+		if (attributes.length > 0) {
+			sqlSelectExitsAts.append("SELECT ati.m_attributesetinstance_id \nFROM\n");
+			sqlSelectExitsAts.append("    (SELECT m_attributesetinstance_id \n    FROM m_attributeinstance ");
+			
+			boolean isFirstAttribute = true;
+
+			for (int i = 0; i < attributes.length; i++)
+			{
+				if (isFirstAttribute){
+					sqlSelectExitsAts.append ("\n    WHERE (");
+					isFirstAttribute = false;
+				}else
+					sqlSelectExitsAts.append (" OR ");
+				
+				boolean isValueNull = false;
+				
+				if (MAttribute.ATTRIBUTEVALUETYPE_List.equals(attributes[i].getAttributeValueType()))
+				{
+					Listbox editor = (Listbox)m_editors.get(i);
+					ListItem item = editor.getSelectedItem();
+					MAttributeValue value = item != null ? (MAttributeValue)item.getValue() : null;
+					sqlSelectExitsAts.append (" m_attributevalue_id ");
+					if (value != null){
+						sqlSelectExitsAts.append (" = ");
+						sqlSelectExitsAts.append (value.get_ID());
+					}else{
+						isValueNull = true;
+					}
+				}
+				else if (MAttribute.ATTRIBUTEVALUETYPE_Number.equals(attributes[i].getAttributeValueType()))
+				{
+					NumberBox editor = (NumberBox)m_editors.get(i);
+					BigDecimal value = editor.getValue();
+					//WHY:setMAttributeInstance doesn't work without decimal point
+					sqlSelectExitsAts.append (" valuenumber ");
+					if (value != null && value.scale() == 0){
+						value = value.setScale(1, BigDecimal.ROUND_HALF_UP);
+						sqlSelectExitsAts.append (" = ");
+						sqlSelectExitsAts.append (value);
+					}else{
+						isValueNull = true;
+					}
+				}
+				else
+				{
+					Textbox editor = (Textbox)m_editors.get(i);
+					String value = editor.getText();
+					if (value != null && value.trim().length() == 0){
+						value = null;
+					}
+					sqlSelectExitsAts.append (" value ");
+					if (value != null){
+						sqlSelectExitsAts.append (" = '");
+						sqlSelectExitsAts.append (value);
+						sqlSelectExitsAts.append ("'");
+					}else{
+						isValueNull = true;
+					}
+				}
+				
+				if (isValueNull)
+					sqlSelectExitsAts.append (" IS NULL ");
+			}
+			
+			
+			if (!isFirstAttribute){
+				sqlSelectExitsAts.append (")");
+			}
+			
+			sqlSelectExitsAts.append ("\n    GROUP BY m_attributesetinstance_id ");
+			sqlSelectExitsAts.append ("\n    HAVING COUNT (m_attributesetinstance_id) = ");
+			sqlSelectExitsAts.append (attributes.length);
+			sqlSelectExitsAts.append ("\n    ) AS ati INNER JOIN m_attributesetinstance atsi");
+			sqlSelectExitsAts.append ("\n    ON (ati.m_attributesetinstance_id = atsi.m_attributesetinstance_id");
+			
+			
+			if (m_masi.getMAttributeSet().isLot() && fieldLotString.getText() != null && fieldLotString.getText().length() > 0) {
+				sqlSelectExitsAts.append (" AND ");
+				sqlSelectExitsAts.append (MAttributeSetInstance.COLUMNNAME_Lot);
+				sqlSelectExitsAts.append (" = '");
+				sqlSelectExitsAts.append (fieldLotString.getText());
+				sqlSelectExitsAts.append ("'");
+			}else if (m_masi.getMAttributeSet().isLot() && (fieldLotString.getText() == null || fieldLotString.getText().length() == 0)) {
+				sqlSelectExitsAts.append (" AND ");
+				sqlSelectExitsAts.append (MAttributeSetInstance.COLUMNNAME_Lot);
+				sqlSelectExitsAts.append (" IS NULL ");
+			}
+			
+			sqlSelectExitsAts.append (") ");
+			sqlSelectExitsAts.append ("\nWHERE m_attributeset_id = ?");
+		}else if (m_masi.getMAttributeSet().isLot()) {// only lot
+			sqlSelectExitsAts.append("SELECT m_attributesetinstance_id \nFROM\n");
+			sqlSelectExitsAts.append(" m_attributesetinstance ");
+			sqlSelectExitsAts.append ("\nWHERE m_attributeset_id = ? ");
+			
+			if (fieldLotString.getText() != null && fieldLotString.getText().length() > 0) {
+				sqlSelectExitsAts.append (" AND ");
+				sqlSelectExitsAts.append (MAttributeSetInstance.COLUMNNAME_Lot);
+				sqlSelectExitsAts.append (" = '");
+				sqlSelectExitsAts.append (fieldLotString.getText());
+				sqlSelectExitsAts.append ("'");
+			}else if (fieldLotString.getText() == null || fieldLotString.getText().length() == 0) {
+				sqlSelectExitsAts.append (" AND ");
+				sqlSelectExitsAts.append (MAttributeSetInstance.COLUMNNAME_Lot);
+				sqlSelectExitsAts.append (" IS NULL ");
+			}
+			
+			sqlSelectExitsAts.append ("\nORDER BY updated DESC");
+		}
+		
+		return sqlSelectExitsAts.toString();
+	}
 	
 	/**************************************************************************
 	 * 	Get Instance ID

@@ -34,6 +34,8 @@ import java.util.Properties;
 import java.util.logging.Level;
 
 import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.adempiere.webui.ClientInfo;
 import org.adempiere.webui.adwindow.ADWindow;
@@ -809,6 +811,23 @@ public final class AEnv
 		}
 					
 		return adWindowID;
+	}
+	
+	/**
+	 * get current httpSession from {@link Executions}
+	 * return null when code not in request context
+	 * @return
+	 */
+	public static HttpSession getCurrentHttpSession (){
+		Execution currentExecution = Executions.getCurrent();
+		if (currentExecution == null)
+			return null;
+		
+		HttpServletRequest httpRequest = (HttpServletRequest) currentExecution.getNativeRequest();
+		if (httpRequest == null)
+			return null;
+		
+		return  httpRequest.getSession(false);
 	}
 	
 	public static WTableDirEditor getListDocumentLanguage (MClient client) throws Exception {

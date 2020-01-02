@@ -17,26 +17,50 @@
  *****************************************************************************/
 package org.adempiere.webui;
 
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+
+import javax.servlet.http.HttpSession;
+
 import org.adempiere.base.event.AbstractEventHandler;
 import org.adempiere.base.event.EventManager;
 import org.adempiere.base.event.IEventTopics;
+import org.adempiere.webui.apps.AEnv;
+import org.adempiere.webui.event.WebEnvUpdateListener;
 import org.compiere.model.I_AD_SysConfig;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.PO;
 import org.compiere.model.X_AD_SysConfig;
+import org.compiere.util.Env;
+import org.compiere.util.EnvUpdateEventInfo;
+import org.compiere.util.IEnvUpdateListener;
 import org.osgi.service.event.Event;
+import org.zkoss.zk.ui.Desktop;
+import org.zkoss.zk.ui.Execution;
+import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.WebApp;
 import org.zkoss.zk.ui.util.WebAppInit;
 
 /**
- * Handle web app init event to sync config store in web config file and database 
+ * Handle web app init event to sync config store in web config file and database
+ * implement interface {@link IEnvUpdateListener} to forward event update var in Env to web  
  * @author hieplq
  *
  */
-public class DefaultWebAppInit implements WebAppInit {
+public class DefaultWebAppInit implements WebAppInit, IEnvUpdateListener {
 
 	private static SystemConfigHandler systemConfigChangeHandler;	
 	protected WebApp  webApp = null;
+	
+	/**
+	 * list listener handle update Env event.
+	 * listener group by session, desktop, window.
+	 */
+	private static Map<String, Map<String, Map<Integer, List<WeakReference<WebEnvUpdateListener>>>>> updateEventListeners;
 	
 	/**
 	 * Register listen model change
@@ -53,6 +77,7 @@ public class DefaultWebAppInit implements WebAppInit {
 		
 		createStaticListeners ();
 		
+		Env.addUpdateEventListener(this);
 	}
 	
 	/**
@@ -195,6 +220,171 @@ public class DefaultWebAppInit implements WebAppInit {
 			registerTableEvent(IEventTopics.PO_BEFORE_DELETE, I_AD_SysConfig.Table_Name);
 			registerTableEvent(IEventTopics.PO_BEFORE_NEW, I_AD_SysConfig.Table_Name);
 		}		
+	}
+
+	/**
+	 * add handle event when has update relate to env in concrete window
+	 * example: a field in window is change value
+	 * @param listener
+	 */
+	public static void addUpdateEventListener(int windowNo, WebEnvUpdateListener listener){
+		Execution currentExecution = Executions.getCurrent();
+		if (currentExecution == null)
+			return;
+		
+		Desktop currentDesktop = currentExecution.getDesktop();
+		if (currentDesktop == null)
+			return;
+		
+		HttpSession httpSession = AEnv.getCurrentHttpSession();
+		if (httpSession == null)
+			return;
+		
+		String sessionId = httpSession.getId();
+		
+		if (updateEventListeners == null){
+			updateEventListeners = new Hashtable<String, Map<String, Map<Integer,List<WeakReference<WebEnvUpdateListener>>>>>();
+		}		
+		
+		// all listener for current session
+		Map<String, Map<Integer, List<WeakReference<WebEnvUpdateListener>>>> sessionMap = null;
+		 
+		if (!updateEventListeners.containsKey(sessionId)){
+			synchronized (sessionId) {
+				if (!updateEventListeners.containsKey(sessionId)){
+					sessionMap = new Hashtable<String, Map<Integer, List<WeakReference<WebEnvUpdateListener>>>>();
+					updateEventListeners.put(sessionId, sessionMap);
+				}
+			}			
+		}
+		
+		sessionMap = updateEventListeners.get(sessionId);
+		
+		// all listener for current desktop
+		Map<Integer, List<WeakReference<WebEnvUpdateListener>>> desktopMap = null;
+		String desktopId = currentDesktop.getId();
+		if (!sessionMap.containsKey(desktopId)){
+			synchronized (desktopId) {
+				if (!sessionMap.containsKey(desktopId)){
+					desktopMap = new Hashtable<Integer, List<WeakReference<WebEnvUpdateListener>>>();
+					sessionMap.put(desktopId, desktopMap);
+				}
+			}
+		}
+		
+		desktopMap = sessionMap.get(desktopId);
+		
+		// all listener for window = windowNo
+		Integer windowIDObj = Integer.valueOf(windowNo);
+		List<WeakReference<WebEnvUpdateListener>> windowList = null;
+		if (!desktopMap.containsKey(windowIDObj)){
+			synchronized (windowIDObj) {
+				if (!desktopMap.containsKey(windowIDObj)){
+					windowList = new ArrayList<WeakReference<WebEnvUpdateListener>>();
+					desktopMap.put(windowIDObj, windowList);
+				}
+			}
+		}
+				
+		windowList = desktopMap.get(windowIDObj);
+		
+		// add listener to list
+		if (!windowList.contains(listener)){
+			synchronized (windowList){
+				if (!windowList.contains(listener.getWeakRef())){
+					windowList.add (listener.getWeakRef());
+				}
+			}
+		}
+	}
+
+	/**
+	 * @param listener
+	 * @return boolean
+	 */
+	public static boolean removeUpdateEventListener(int windowNo, WebEnvUpdateListener listener){
+		Execution currentExecution = Executions.getCurrent();
+		if (currentExecution == null)
+			return false;
+		
+		Desktop currentDesktop = currentExecution.getDesktop();
+		if (currentDesktop == null)
+			return false;
+		
+		HttpSession httpSession = AEnv.getCurrentHttpSession();
+		if (httpSession == null)
+			return false;
+		
+		String sessionId = httpSession.getId();
+		
+		Map<String, Map<Integer, List<WeakReference<WebEnvUpdateListener>>>> sessionMap = updateEventListeners.get(sessionId);
+		if (sessionMap == null)
+			return true;
+		
+		Map<Integer, List<WeakReference<WebEnvUpdateListener>>> desktopMap = sessionMap.get(currentDesktop.getId());
+		if (desktopMap == null)
+			return false;
+		
+		List<WeakReference<WebEnvUpdateListener>> windowList = desktopMap.get(Integer.valueOf(windowNo));
+		if (windowList == null)
+			return false;
+		
+		synchronized (windowList){
+			return windowList.remove(listener.getWeakRef());
+		}
+	}
+	
+	/**
+	 * find listener base in session, desktop and window, and sent event to it.
+	 * @param info
+	 */
+	protected static void fireEnvUpdate (EnvUpdateEventInfo info){
+		if (updateEventListeners == null)
+			return;
+		
+		Execution currentExecution = Executions.getCurrent();
+		if (currentExecution == null)
+			return;
+		
+		HttpSession currentSession = AEnv.getCurrentHttpSession();
+		
+		if (currentSession == null)
+			return;
+		
+		Map<String, Map<Integer, List<WeakReference<WebEnvUpdateListener>>>> sessionMap = updateEventListeners.get(currentSession.getId());
+		if (sessionMap == null)
+			return;
+		
+		Desktop currentDesktop = currentExecution.getDesktop();
+		if (currentDesktop == null)
+			return;
+		
+		Map<Integer, List<WeakReference<WebEnvUpdateListener>>> desktopMap = sessionMap.get(currentDesktop.getId());
+		if (desktopMap == null)
+			return;
+		
+		List<WeakReference<WebEnvUpdateListener>> lsListener = desktopMap.get(info.WindowNo);
+		if (lsListener == null)
+			return;
+		
+		ListIterator<WeakReference<WebEnvUpdateListener>> iterator = lsListener.listIterator();
+		if (iterator.hasNext()){
+			WeakReference<WebEnvUpdateListener> listener = iterator.next();
+			WebEnvUpdateListener realListener = listener.get();
+			if (realListener != null)
+				realListener.updateEnv(info);
+		}
+		
+	}
+
+	/*
+	 * hand update env update from base layer and broad it to web tie listener 
+	 * @see org.compiere.util.IEnvUpdateListener#updateEnv(org.compiere.util.EnvUpdateEventInfo)
+	 */
+	@Override
+	public void updateEnv(EnvUpdateEventInfo info) {
+		fireEnvUpdate (info);
+		
 	}
 
 }

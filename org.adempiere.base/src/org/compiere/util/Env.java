@@ -32,6 +32,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.Set;
@@ -92,6 +93,12 @@ public final class Env
 	private final static ContextProvider clientContextProvider = new DefaultContextProvider();
 
 	private static List<IEnvEventListener> eventListeners = new ArrayList<IEnvEventListener>();
+	
+	/**
+	 * list listener call when has update in env.
+	 * note:at moment, focus to env relate window
+	 */
+	private static List<IEnvUpdateListener> updateEventListeners = new ArrayList<IEnvUpdateListener>(); 
 
 	public static int adWindowDummyID =200054; 
 	
@@ -123,6 +130,37 @@ public final class Env
 		return eventListeners.remove(listener);
 	}
 
+	/**
+	 * add listener to list
+	 * @param listener
+	 */
+	public static void addUpdateEventListener(IEnvUpdateListener listener){		
+		if (!updateEventListeners.contains(listener)){
+			updateEventListeners.add (listener);
+		}
+	}
+
+	/**
+	 * remove listener
+	 * @param listener
+	 * @return boolean
+	 */
+	public static boolean removeUpdateEventListener(IEnvUpdateListener listener){
+		return updateEventListeners.remove (listener);
+	}
+	
+	/*
+	 * call listener when update env
+	 */
+	public static void fireEnvUpdate (Properties ctx, int WindowNo, int TabNo, String context, Object value, Object oldValue){
+		EnvUpdateEventInfo info = new EnvUpdateEventInfo(ctx, WindowNo, TabNo, context, value, oldValue);
+		ListIterator<IEnvUpdateListener> lsInterator = updateEventListeners.listIterator();
+		while (lsInterator.hasNext()){
+			IEnvUpdateListener listener = lsInterator.next();
+			listener.updateEnv(info);
+		}
+	}
+	
 	/**
 	 *	Exit System
 	 *  @param status System exit status (usually 0 for no error)
@@ -335,10 +373,13 @@ public final class Env
 			return;
 		if (log.isLoggable(Level.FINER)) log.finer("Context("+WindowNo+") " + context + "==" + value);
 		//
+		Object oldValue = ctx.getProperty(WindowNo+"|"+context); 
 		if (value == null || value.equals(""))
 			ctx.remove(WindowNo+"|"+context);
 		else
 			ctx.setProperty(WindowNo+"|"+context, value);
+		
+		fireEnvUpdate(ctx, WindowNo, -1, context, value, oldValue); 
 	}	//	setContext
 
 	/**
@@ -352,6 +393,7 @@ public final class Env
 	{
 		if (ctx == null || context == null)
 			return;
+		Object oldValue = ctx.getProperty(WindowNo+"|"+context);
 		if (value == null)
 		{
 			ctx.remove(WindowNo+"|"+context);
@@ -371,6 +413,8 @@ public final class Env
 			ctx.setProperty(WindowNo+"|"+context, stringValue);
 			if (log.isLoggable(Level.FINER)) log.finer("Context("+WindowNo+") " + context + "==" + stringValue);
 		}
+		
+		fireEnvUpdate(ctx, WindowNo, -1, context, value, oldValue); 
 	}	//	setContext
 	
 	/**
@@ -385,8 +429,12 @@ public final class Env
 		if (ctx == null || context == null)
 			return;
 		if (log.isLoggable(Level.FINER)) log.finer("Context("+WindowNo+") " + context + "==" + value);
+		
+		Object oldValue = ctx.getProperty (WindowNo+"|"+context); 
 		//
 		ctx.setProperty(WindowNo+"|"+context, String.valueOf(value));
+		
+		fireEnvUpdate(ctx, WindowNo, -1, context, value, oldValue);
 	}	//	setContext
 
 	public static void setContext (Properties ctx, int WindowNo, int TabNo, String context, int value)
@@ -439,6 +487,7 @@ public final class Env
 		if (ctx == null || context == null)
 			return;
 		if (log.isLoggable(Level.FINEST)) log.finest("Context("+WindowNo+","+TabNo+") " + context + "==" + value);
+		Object oldValue = ctx.getProperty(WindowNo+"|"+TabNo+"|"+context);
 		//
 		if (value == null)
 			if (context.endsWith("_ID"))
@@ -447,6 +496,8 @@ public final class Env
 			else
 				value = new String("");
 		ctx.setProperty(WindowNo+"|"+TabNo+"|"+context, value);
+		
+		fireEnvUpdate(ctx, WindowNo, TabNo, context, value, oldValue);
 	}	//	setContext
 
 	/**

@@ -22,6 +22,7 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Properties;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.MAttributeSet;
 import org.compiere.model.MCharge;
 import org.compiere.model.MLocator;
@@ -32,6 +33,8 @@ import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+
+import vn.hsv.idempiere.base.util.NullProviderOrderInfo;
 
 /**
  *  Order Line Model.
@@ -542,7 +545,9 @@ public class MDDOrderLine extends X_DD_OrderLine
 			setM_AttributeSetInstance_ID(0);
 		//	Product
 		
-
+		if (String.valueOf(1) == "1"){
+			throw new AdempiereException("something wrong, contact with hieplq@hasuvimex.vn");
+		}
 		//	UOM
 		if (getC_UOM_ID() == 0 
 			&& (getM_Product_ID() != 0 
@@ -579,7 +584,10 @@ public class MDDOrderLine extends X_DD_OrderLine
 				if (isInstance)
 				{
 					MLocator locator_from = MLocator.get(getCtx(), getM_Locator_ID());
-					MStorageOnHand[] storages = MStorageOnHand.getWarehouse(getCtx(),
+					if ("1".equals(String.valueOf(1))){
+						throw new AdempiereException("something wrong, contact with hieplq@hasuvimex.vn");
+					}
+					MStorageOnHand[] storages = MStorageOnHand.getWarehouse(NullProviderOrderInfo.NULL, getCtx(),
 							locator_from.getM_Warehouse_ID(), getM_Product_ID(), getM_AttributeSetInstance_ID(),
 							null, true, false, 0, get_TrxName());
 					BigDecimal qty = Env.ZERO;

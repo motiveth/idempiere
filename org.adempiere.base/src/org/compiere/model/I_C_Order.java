@@ -1151,6 +1151,15 @@ public interface I_C_Order
 	  */
 	public BigDecimal getTotalLines();
 
+    /** Column name TrackingInfo */
+    public static final String COLUMNNAME_TrackingInfo = "TrackingInfo";
+
+	/** Set Tracking Info	  */
+	public void setTrackingInfo (boolean TrackingInfo);
+
+	/** Get Tracking Info	  */
+	public boolean isTrackingInfo();
+
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";
 

@@ -22,7 +22,11 @@ import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Util;
 
-public class MProduction extends X_M_Production implements DocAction {
+import vn.hsv.idempiere.base.util.ITrackingProduct;
+import vn.hsv.idempiere.base.util.ModelUtil;
+import vn.hsv.idempiere.base.util.NullProviderOrderInfo;
+
+public class MProduction extends X_M_Production implements DocAction, ITrackingProduct {
 	/**
 	 * 
 	 */
@@ -176,7 +180,7 @@ public class MProduction extends X_M_Production implements DocAction {
 			}
 		}
 
-		return errors.toString();
+		return errors.toString(); 
 	}
 	
 
@@ -337,8 +341,10 @@ public class MProduction extends X_M_Production implements DocAction {
 						{ 
 							MMPolicy = client.getMMPolicy();
 						}
-
-						storages = MStorageOnHand.getWarehouse(getCtx(), M_Warehouse_ID, BOMProduct_ID, 0, null,
+						if (String.valueOf(1).equals("1")){
+							throw new AdempiereException("something wrong, contact with hieplq@hasuvimex.vn");
+						}
+						storages = MStorageOnHand.getWarehouse(NullProviderOrderInfo.NULL, getCtx(), M_Warehouse_ID, BOMProduct_ID, 0, null,
 								MProductCategory.MMPOLICY_FiFo.equals(MMPolicy), true, 0, get_TrxName());
 
 						MProductionLine BOMLine = null;
@@ -774,6 +780,8 @@ public class MProduction extends X_M_Production implements DocAction {
 		to.setProcessing(false);
 		to.setProcessed(false);
 		to.setIsUseProductionPlan(isUseProductionPlan());
+		to.setM_AttributeSetInstance_ID(getM_AttributeSetInstance_ID());
+		to.setC_OrderLine_ID(getC_OrderLine_ID());
 		if (isUseProductionPlan()) {
 			to.saveEx();
 			Query planQuery = new Query(Env.getCtx(), I_M_ProductionPlan.Table_Name, "M_ProductionPlan.M_Production_ID=?", get_TrxName());
@@ -782,6 +790,8 @@ public class MProduction extends X_M_Production implements DocAction {
 				MProductionPlan tplan = new MProductionPlan(getCtx(), 0, get_TrxName());
 				PO.copyValues (fplan, tplan, getAD_Client_ID(), getAD_Org_ID());
 				tplan.setM_Production_ID(to.getM_Production_ID());
+				tplan.setM_AttributeSetInstance_ID(fplan.getM_AttributeSetInstance_ID());
+				tplan.setC_OrderLine_ID(fplan.getC_OrderLine_ID());
 				tplan.setProductionQty(fplan.getProductionQty().negate());
 				tplan.setProcessed(false);
 				tplan.saveEx();
@@ -794,6 +804,7 @@ public class MProduction extends X_M_Production implements DocAction {
 					tline.setMovementQty(fline.getMovementQty().negate());
 					tline.setPlannedQty(fline.getPlannedQty().negate());
 					tline.setQtyUsed(fline.getQtyUsed().negate());
+					tline.setM_AttributeSetInstance_ID(fline.getM_AttributeSetInstance_ID());
 					tline.saveEx();
 				}
 			}
@@ -807,6 +818,7 @@ public class MProduction extends X_M_Production implements DocAction {
 				tline.setM_Production_ID(to.getM_Production_ID());
 				tline.setMovementQty(fline.getMovementQty().negate());
 				tline.setPlannedQty(fline.getPlannedQty().negate());
+				tline.setM_AttributeSetInstance_ID(fline.getM_AttributeSetInstance_ID());
 				tline.setQtyUsed(fline.getQtyUsed().negate());
 				tline.saveEx();
 			}
@@ -914,5 +926,52 @@ public class MProduction extends X_M_Production implements DocAction {
 			}
 		}
 		return true;
+	}
+	
+	/* (non-Javadoc)
+	 * @see vn.hsv.idempiere.base.util.IOrderLineLink#getC_Order()
+	 */
+	@Override
+	public I_C_Order getOrderRef() {
+		return ModelUtil.implementGetOrderRef(this);
+	}
+
+	/* (non-Javadoc)
+	 * @see vn.hsv.idempiere.base.util.IOrderLineLink#getC_Order_ID()
+	 */
+	@Override
+	public int getOrderRefID() {
+		return ModelUtil.implementGetOrderRefID(this);
+	}
+
+	/* (non-Javadoc)
+	 * @see vn.hsv.idempiere.base.util.IOrderLineLink#getOrderLine()
+	 */
+	@Override
+	public I_C_OrderLine getOrderLineRef() {
+		return getC_OrderLine();
+	}
+
+	/* (non-Javadoc)
+	 * @see vn.hsv.idempiere.base.util.IOrderLineLink#getOrderLineRefID()
+	 */
+	@Override
+	public int getOrderLineRefID() {
+		return getC_OrderLine_ID();
+	}
+	
+	@Override
+	public int getAsiID() {
+		return getM_AttributeSetInstance_ID();
+	}
+
+	@Override
+	public I_M_AttributeSetInstance getAsi() {
+		return getM_AttributeSetInstance();
+	}
+
+	@Override
+	public Boolean isMatchRequirementASI() {
+		return ModelUtil.implementCheckMatchRequirement (getM_Product());
 	}
 }

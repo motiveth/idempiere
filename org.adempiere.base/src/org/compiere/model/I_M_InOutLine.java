@@ -148,6 +148,17 @@ public interface I_M_InOutLine
 
 	public org.compiere.model.I_C_OrderLine getC_OrderLine() throws RuntimeException;
 
+    /** Column name C_OrderLine_Ref_OrderLine_ID */
+    public static final String COLUMNNAME_C_OrderLine_Ref_OrderLine_ID = "C_OrderLine_Ref_OrderLine_ID";
+
+	/** Set c_orderline_ref_orderline_id	  */
+	public void setC_OrderLine_Ref_OrderLine_ID (int C_OrderLine_Ref_OrderLine_ID);
+
+	/** Get c_orderline_ref_orderline_id	  */
+	public int getC_OrderLine_Ref_OrderLine_ID();
+
+	public org.compiere.model.I_C_OrderLine getC_OrderLine_Ref_OrderLine() throws RuntimeException;
+
     /** Column name C_Project_ID */
     public static final String COLUMNNAME_C_Project_ID = "C_Project_ID";
 

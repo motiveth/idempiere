@@ -567,7 +567,9 @@ public class InOutGenerate extends SvrProcess
 		
 		if (m_lastStorages == null)
 		{
-			MStorageOnHand[] tmpStorages = MStorageOnHand.getWarehouse(getCtx(), 
+			if (1==1)
+				throw new AdempiereException("it have to be done soon, please contact with hieplq@hasuvimex.vn");
+			MStorageOnHand[] tmpStorages = MStorageOnHand.getWarehouse(null, getCtx(), 
 				M_Warehouse_ID, M_Product_ID, M_AttributeSetInstance_ID,
 				minGuaranteeDate, FiFo,false, 0, get_TrxName());
 

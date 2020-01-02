@@ -43,6 +43,8 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.Msg;
 
+import vn.hsv.idempiere.base.util.ModelUtil;
+
 /**
  *  Create Invoice Transactions from PO Orders or Receipt
  *
@@ -635,6 +637,9 @@ public abstract class CreateFromShipment extends CreateFrom
 					iol.setAD_OrgTrx_ID(ol.getAD_OrgTrx_ID());
 					iol.setUser1_ID(ol.getUser1_ID());
 					iol.setUser2_ID(ol.getUser2_ID());
+					if (!ModelUtil.isShipmmentLine(iol)){
+						iol.setC_OrderLine_Ref_OrderLine_ID(ol.getOrderLineRefID());
+					}
 				}
 				else if (il != null)
 				{

@@ -29,6 +29,9 @@ import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Util;
 
+import vn.hsv.idempiere.base.util.ITrackingProduct;
+import vn.hsv.idempiere.base.util.ModelUtil;
+
 
 /**
  *	Inventory Material Allocation
@@ -36,7 +39,7 @@ import org.compiere.util.Util;
  *  @author Jorg Janke
  *  @version $Id: MInventoryLineMA.java,v 1.3 2006/07/30 00:51:04 jjanke Exp $
  */
-public class MInventoryLineMA extends X_M_InventoryLineMA
+public class MInventoryLineMA extends X_M_InventoryLineMA implements ITrackingProduct
 {
 	/**
 	 * 
@@ -257,4 +260,40 @@ public class MInventoryLineMA extends X_M_InventoryLineMA
 		
 		return true;
 	} //beforeSave
+	
+
+	@Override
+	public int getAsiID() {
+		return getM_AttributeSetInstance_ID();
+	}
+
+	@Override
+	public I_M_AttributeSetInstance getAsi() {
+		return getM_AttributeSetInstance();
+	}
+
+	@Override
+	public I_C_OrderLine getOrderLineRef() {
+		return ModelUtil.implementGetOrderLineRefFromParent((MInventoryLine)getM_InventoryLine());
+	}
+
+	@Override
+	public I_C_Order getOrderRef() {
+		return ModelUtil.implementGetOrderRefFromParent((MInventoryLine)getM_InventoryLine());
+	}
+
+	@Override
+	public int getOrderLineRefID() {
+		return ModelUtil.implementGetOrderLineRefIDFromParent((MInventoryLine)getM_InventoryLine());
+	}
+
+	@Override
+	public int getOrderRefID() {
+		return ModelUtil.implementGetOrderRefIDFromParent((MInventoryLine)getM_InventoryLine());
+	}
+
+	@Override
+	public Boolean isMatchRequirementASI() {
+		return ModelUtil.implementCheckMatchRequirement (getM_InventoryLine().getM_Product());
+	}
 }	//	MInventoryLineMA

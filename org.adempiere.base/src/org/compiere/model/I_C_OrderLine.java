@@ -193,6 +193,17 @@ public interface I_C_OrderLine
 	  */
 	public int getC_OrderLine_ID();
 
+    /** Column name C_OrderLine_Ref_OrderLine_ID */
+    public static final String COLUMNNAME_C_OrderLine_Ref_OrderLine_ID = "C_OrderLine_Ref_OrderLine_ID";
+
+	/** Set c_orderline_ref_orderline_id	  */
+	public void setC_OrderLine_Ref_OrderLine_ID (int C_OrderLine_Ref_OrderLine_ID);
+
+	/** Get c_orderline_ref_orderline_id	  */
+	public int getC_OrderLine_Ref_OrderLine_ID();
+
+	public org.compiere.model.I_C_OrderLine getC_OrderLine_Ref_OrderLine() throws RuntimeException;
+
     /** Column name C_OrderLine_UU */
     public static final String COLUMNNAME_C_OrderLine_UU = "C_OrderLine_UU";
 
@@ -388,6 +399,19 @@ public interface I_C_OrderLine
 	  * Discount in percent
 	  */
 	public BigDecimal getDiscount();
+
+    /** Column name DocumentNo */
+    public static final String COLUMNNAME_DocumentNo = "DocumentNo";
+
+	/** Set Document No.
+	  * Document sequence number of the document
+	  */
+	public void setDocumentNo (String DocumentNo);
+
+	/** Get Document No.
+	  * Document sequence number of the document
+	  */
+	public String getDocumentNo();
 
     /** Column name FreightAmt */
     public static final String COLUMNNAME_FreightAmt = "FreightAmt";

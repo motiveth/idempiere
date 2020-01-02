@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 
 import org.adempiere.base.Core;
+import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.MBPartner;
 import org.compiere.model.MClient;
 import org.compiere.model.MDocType;
@@ -550,7 +551,10 @@ public class ReplenishReport extends SvrProcess
 			//	From: Look-up Storage
 			MProduct product = MProduct.get(getCtx(), replenish.getM_Product_ID());
 			String MMPolicy = product.getMMPolicy();
-			MStorageOnHand[] storages = MStorageOnHand.getWarehouse(getCtx(),
+			if (1==1)
+				throw new AdempiereException("not for you. please go aways or call hieplq@hasuvimex.vn");
+
+			MStorageOnHand[] storages = MStorageOnHand.getWarehouse(null, getCtx(),
 				whSource.getM_Warehouse_ID(), replenish.getM_Product_ID(), 0, null, 
 				MClient.MMPOLICY_FiFo.equals(MMPolicy), false, 0, get_TrxName());
 			//

@@ -98,13 +98,14 @@ public class CalloutInventory extends CalloutEngine
 			else
 				mTab.setValue(MInventoryLine.COLUMNNAME_M_AttributeSetInstance_ID, null);
 		}
-			
+		
 		// Set QtyBook from first storage location
 		// kviiksaar: Call's now the extracted function
 		BigDecimal bd = null;
 		if (MDocType.DOCSUBTYPEINV_PhysicalInventory.equals(docSubTypeInv)) {
 			try {
-				bd = setQtyBook(M_AttributeSetInstance_ID, M_Product_ID, M_Locator_ID);
+				Integer M_OrderLine_ID = (Integer)mTab.getValue(MInventoryLine.COLUMNNAME_C_OrderLine_ID);
+				bd = setQtyBook(M_AttributeSetInstance_ID, M_Product_ID, M_Locator_ID, M_OrderLine_ID==null?0:M_OrderLine_ID);
 				mTab.setValue("QtyBook", bd);
 			} catch (Exception e) {
 				return e.getLocalizedMessage();
@@ -131,13 +132,14 @@ public class CalloutInventory extends CalloutEngine
 	 * @return
 	 * @throws Exception
 	 */
-	private BigDecimal setQtyBook (int M_AttributeSetInstance_ID, int M_Product_ID, int M_Locator_ID) throws Exception {
+	private BigDecimal setQtyBook (int M_AttributeSetInstance_ID, int M_Product_ID, int M_Locator_ID, int orderLineID) throws Exception {
 		// Set QtyBook from first storage location
 		BigDecimal bd = null;
 		String sql = "SELECT SUM(QtyOnHand) FROM M_StorageOnHand "
 			+ "WHERE M_Product_ID=?"	//	1
 			+ " AND M_Locator_ID=?"		//	2
-			+ " AND M_AttributeSetInstance_ID=?"; //3
+			+ " AND M_AttributeSetInstance_ID=?" //3
+			+ " AND COALESCE (C_OrderLine_ID, 0)=?";
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try
@@ -146,6 +148,7 @@ public class CalloutInventory extends CalloutEngine
 			pstmt.setInt(1, M_Product_ID);
 			pstmt.setInt(2, M_Locator_ID);
 			pstmt.setInt(3, M_AttributeSetInstance_ID);
+			pstmt.setInt(4, orderLineID);
 			rs = pstmt.executeQuery();
 			if (rs.next())
 			{

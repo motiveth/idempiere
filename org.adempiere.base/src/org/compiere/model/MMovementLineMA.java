@@ -29,6 +29,9 @@ import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Util;
 
+import vn.hsv.idempiere.base.util.ITrackingProduct;
+import vn.hsv.idempiere.base.util.ModelUtil;
+
 
 /**
  *	Movement Material Allocation
@@ -36,7 +39,7 @@ import org.compiere.util.Util;
  *  @author Jorg Janke
  *  @version $Id: MMovementLineMA.java,v 1.3 2006/07/30 00:51:05 jjanke Exp $
  */
-public class MMovementLineMA extends X_M_MovementLineMA
+public class MMovementLineMA extends X_M_MovementLineMA implements ITrackingProduct
 {
 	/**
 	 * 
@@ -263,4 +266,40 @@ public class MMovementLineMA extends X_M_MovementLineMA
 		return true;
 	} //beforeSave
 	
+
+	@Override
+	public int getAsiID() {
+		return getM_AttributeSetInstance_ID();
+	}
+
+	@Override
+	public I_M_AttributeSetInstance getAsi() {
+		return getM_AttributeSetInstance();
+	}
+
+	@Override
+	public I_C_OrderLine getOrderLineRef() {
+		return ModelUtil.implementGetOrderLineRefFromParent((MMovementLine)getM_MovementLine());
+	}
+
+	@Override
+	public I_C_Order getOrderRef() {
+		return ModelUtil.implementGetOrderRefFromParent((MMovementLine)getM_MovementLine());
+	}
+
+	@Override
+	public int getOrderLineRefID() {
+		return ModelUtil.implementGetOrderLineRefIDFromParent((MMovementLine)getM_MovementLine());
+	}
+
+	@Override
+	public int getOrderRefID() {
+		return ModelUtil.implementGetOrderRefIDFromParent((MMovementLine)getM_MovementLine());
+	}
+
+	@Override
+	public Boolean isMatchRequirementASI() {
+		return ModelUtil.implementCheckMatchRequirement (getM_MovementLine().getM_Product());
+	}
+
 }	//	MMovementLineMA

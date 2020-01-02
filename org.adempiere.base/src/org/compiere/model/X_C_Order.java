@@ -2125,6 +2125,27 @@ public class X_C_Order extends PO implements I_C_Order, I_Persistent
 		return bd;
 	}
 
+	/** Set Tracking Info.
+		@param TrackingInfo Tracking Info	  */
+	public void setTrackingInfo (boolean TrackingInfo)
+	{
+		set_Value (COLUMNNAME_TrackingInfo, Boolean.valueOf(TrackingInfo));
+	}
+
+	/** Get Tracking Info.
+		@return Tracking Info	  */
+	public boolean isTrackingInfo () 
+	{
+		Object oo = get_Value(COLUMNNAME_TrackingInfo);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
 	public org.compiere.model.I_C_ElementValue getUser1() throws RuntimeException
     {
 		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_Name)

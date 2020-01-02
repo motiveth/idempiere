@@ -193,8 +193,8 @@ public class WCreateFromShipmentUI extends CreateFromShipment implements EventLi
 		row.appendChild(locatorLabel.rightAlign());
 		row.appendChild(locatorField.getComponent());
     	if (! isRMAWindow) {
-    		row.appendChild(invoiceLabel.rightAlign());
-    		row.appendChild(invoiceField);
+    		//row.appendChild(invoiceLabel.rightAlign());
+    		//row.appendChild(invoiceField);
     		ZKUpdateUtil.setHflex(invoiceField, "1");
     	}
         

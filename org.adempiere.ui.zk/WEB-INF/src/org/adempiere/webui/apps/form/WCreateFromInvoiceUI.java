@@ -161,9 +161,9 @@ public class WCreateFromInvoiceUI extends CreateFromInvoice implements EventList
 		row.appendChild(bPartnerLabel.rightAlign());
 		if (bPartnerField != null)
 			row.appendChild(bPartnerField.getComponent());
-		row.appendChild(orderLabel.rightAlign());
+		//row.appendChild(orderLabel.rightAlign());
 		ZKUpdateUtil.setHflex(orderField, "1");
-		row.appendChild(orderField);
+		//row.appendChild(orderField);
 		
 		row = rows.newRow();
 		row.appendChild(new Space());

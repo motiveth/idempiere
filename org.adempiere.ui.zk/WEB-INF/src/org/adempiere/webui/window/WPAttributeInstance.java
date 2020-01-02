@@ -18,7 +18,8 @@ package org.adempiere.webui.window;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 
 import org.adempiere.webui.apps.AEnv;
@@ -31,10 +32,12 @@ import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.minigrid.ColumnInfo;
 import org.compiere.minigrid.IDColumn;
+import org.compiere.model.MAttribute;
+import org.compiere.model.MAttributeSet;
+import org.compiere.model.MProduct;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
-import org.compiere.util.KeyNamePair;
 import org.compiere.util.Msg;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
@@ -68,7 +71,7 @@ public class WPAttributeInstance extends Window implements EventListener<Event>
 	 * 	@param C_BPartner_ID bp
 	 */
 	public WPAttributeInstance(String title,
-		int M_Warehouse_ID, int M_Locator_ID, int M_Product_ID, int C_BPartner_ID)
+		int M_Warehouse_ID, int M_Locator_ID, int M_Product_ID, int C_BPartner_ID, int m_WindowNo)
 	{
 		super ();
 		this.setTitle(Msg.getMsg(Env.getCtx(), "PAttributeInstance") + title);
@@ -88,7 +91,7 @@ public class WPAttributeInstance extends Window implements EventListener<Event>
 			});
 		}
 		this.setSclass("pattribute-instance-dialog");
-		
+		this.m_WindowNo = m_WindowNo;
 		init (M_Warehouse_ID, M_Locator_ID, M_Product_ID, C_BPartner_ID);
 		AEnv.showCenterScreen(this);
 	}	//	PAttributeInstance
@@ -105,7 +108,7 @@ public class WPAttributeInstance extends Window implements EventListener<Event>
 		log.info("M_Warehouse_ID=" + M_Warehouse_ID 
 			+ ", M_Locator_ID=" + M_Locator_ID
 			+ ", M_Product_ID=" + M_Product_ID);
-		m_M_Warehouse_ID = M_Warehouse_ID;
+		//m_M_Warehouse_ID = M_Warehouse_ID;
 		m_M_Locator_ID = M_Locator_ID;
 		m_M_Product_ID = M_Product_ID;
 		try
@@ -123,16 +126,20 @@ public class WPAttributeInstance extends Window implements EventListener<Event>
 	private Panel northPanel = new Panel();
 	private ConfirmPanel confirmPanel = new ConfirmPanel (true);
 	private Checkbox showAll = new Checkbox();
+	private Checkbox showOnlyQtyPositive = new Checkbox();
+	private Checkbox showOnlyCurrentWarehouse = new Checkbox();
 	//
 	private WListbox 			m_table = new WListbox();
 	//	Parameter
-	private int			 		m_M_Warehouse_ID;
+	//private int			 		m_M_Warehouse_ID;
 	private int			 		m_M_Locator_ID;
 	private int			 		m_M_Product_ID;
 	//
 	private int					m_M_AttributeSetInstance_ID = -1;
 	private String				m_M_AttributeSetInstanceName = null;
 	private String				m_sql;
+	protected String 			m_sqlAll;
+	protected int m_WindowNo = 0;
 	/**	Logger			*/
 	private static final CLogger log = CLogger.getCLogger(WPAttributeInstance.class);
 
@@ -142,16 +149,21 @@ public class WPAttributeInstance extends Window implements EventListener<Event>
 	 */
 	private void init() throws Exception
 	{
-		showAll.setLabel(Msg.getMsg(Env.getCtx(), "ShowAll"));
-		
+		//showAll.setLabel(Msg.getMsg(Env.getCtx(), "ShowAll"));
+		showOnlyQtyPositive.setLabel(Msg.getMsg(Env.getCtx(), "Show Only Qty Positive"));
+		showOnlyCurrentWarehouse.setLabel(Msg.getMsg(Env.getCtx(), "Show Only Current Warehouse"));
 		this.appendChild(mainLayout);
 		
 		//	North
 		Hbox box = new Hbox();
 		box.setParent(northPanel);
 		box.setPack("end");
-		box.appendChild(showAll);
-		showAll.addEventListener(Events.ON_CHECK, this);
+		//box.appendChild(showAll);
+		//showAll.addEventListener(Events.ON_CHECK, this);
+		box.appendChild(showOnlyCurrentWarehouse);
+		box.appendChild(showOnlyQtyPositive);
+		showOnlyCurrentWarehouse.addEventListener(Events.ON_CHECK, this);
+		showOnlyQtyPositive.addEventListener(Events.ON_CHECK, this);
 		
 		North north = new North();
 		north.setParent(mainLayout);
@@ -169,37 +181,167 @@ public class WPAttributeInstance extends Window implements EventListener<Event>
 		south.setParent(mainLayout);
 		south.appendChild(confirmPanel);
 		confirmPanel.addActionListener(this);
+		
+		
 	}	//	jbInit
 
-	/**	Table Column Layout Info			*/
-	private static ColumnInfo[] s_layout = new ColumnInfo[] 
-	{
-		new ColumnInfo(" ", "s.M_AttributeSetInstance_ID", IDColumn.class),
-		new ColumnInfo(Msg.translate(Env.getCtx(), "Description"), "asi.Description", String.class),
-		new ColumnInfo(Msg.translate(Env.getCtx(), "Lot"), "asi.Lot", String.class),
-		new ColumnInfo(Msg.translate(Env.getCtx(), "SerNo"), "asi.SerNo", String.class), 
-		new ColumnInfo(Msg.translate(Env.getCtx(), "GuaranteeDate"), "asi.GuaranteeDate", Timestamp.class),
-		new ColumnInfo(Msg.translate(Env.getCtx(), "M_Locator_ID"), "l.Value", KeyNamePair.class, "s.M_Locator_ID"),
-		new ColumnInfo(Msg.translate(Env.getCtx(), "QtyOnHand"), "s.QtyOnHand", Double.class),
-		new ColumnInfo(Msg.translate(Env.getCtx(), "QtyReserved"), "s.QtyReserved", Double.class),
-		new ColumnInfo(Msg.translate(Env.getCtx(), "QtyOrdered"), "s.QtyOrdered", Double.class),
-		//	See RV_Storage
-		new ColumnInfo(Msg.translate(Env.getCtx(), "GoodForDays"), "(daysbetween(asi.GuaranteeDate, getDate()))-p.GuaranteeDaysMin", Integer.class, true, true, null),
-		new ColumnInfo(Msg.translate(Env.getCtx(), "ShelfLifeDays"), "daysbetween(asi.GuaranteeDate, getDate())", Integer.class),
-		new ColumnInfo(Msg.translate(Env.getCtx(), "ShelfLifeRemainingPct"), "CASE WHEN p.GuaranteeDays > 0 THEN TRUNC(((daysbetween(asi.GuaranteeDate, getDate()))/p.GuaranteeDays)*100) ELSE 0 END", Integer.class),
-	};
-	/**	From Clause							*/
-	private static String s_sqlFrom = "M_Storage s"
-		+ " INNER JOIN M_Locator l ON (s.M_Locator_ID=l.M_Locator_ID)"
-		+ " INNER JOIN M_Product p ON (s.M_Product_ID=p.M_Product_ID)"
-		+ " LEFT OUTER JOIN M_AttributeSetInstance asi ON (s.M_AttributeSetInstance_ID=asi.M_AttributeSetInstance_ID)";
-	/** Where Clause						*/
-	private static String s_sqlWhere = "s.M_Product_ID=? AND l.M_Warehouse_ID=?"; 
-	private static String s_sqlWhereWithoutWarehouse = " s.M_Product_ID=?"; 
-
-	private String	m_sqlNonZero = " AND (s.QtyOnHand<>0 OR s.QtyReserved<>0 OR s.QtyOrdered<>0)";
-	private String	m_sqlMinLife = "";
-
+	/**
+	 * SELECT asi_id, xx, yy 
+	FROM crosstab(
+	  $$select m_attributesetinstance_id, m_attribute_id, "value"
+	   from m_attributeinstance
+	   where m_attributesetinstance_id > 1000 order by 1, 2$$ )
+	AS ct(asi_id numeric(10, 0), xx character varying(40), yy character varying(40));
+	 * @param m_M_Product_ID
+	 * @return
+	 */
+	protected ColumnInfo[] getColumnAsiList (int m_M_Product_ID){
+		List <ColumnInfo> lsColumnInfo = new ArrayList<>();
+		MProduct product = MProduct.get(Env.getCtx(), m_M_Product_ID);
+		MAttributeSet as = product.getAttributeSet();
+		// order by id to match with pivot query
+		MAttribute[] lsAttributeInstance = as.getMAttributes(true, true);
+		
+		lsColumnInfo.add(new ColumnInfo(" ", "asi.m_attributesetinstance_id", IDColumn.class));
+		
+		if (lsAttributeInstance.length > 0){
+			for (MAttribute attr : lsAttributeInstance){
+				lsColumnInfo.add(new ColumnInfo(attr.getName(), "c" + String.valueOf(attr.get_ID()), String.class));
+			}
+		}
+		
+		lsColumnInfo.add(new ColumnInfo(Msg.translate(Env.getCtx(), "Description"), "asi.Description", String.class));
+		if (as.isLot())
+			lsColumnInfo.add(new ColumnInfo(Msg.translate(Env.getCtx(), "Lot"), "asi.Lot", String.class));
+		if (as.isSerNo())
+			lsColumnInfo.add(new ColumnInfo(Msg.translate(Env.getCtx(), "SerNo"), "asi.SerNo", String.class));
+		lsColumnInfo.add(new ColumnInfo(Msg.translate(Env.getCtx(), "QtyOnHand"), "qty", Double.class));
+		
+		return lsColumnInfo.toArray(new ColumnInfo[]{});
+	}
+	
+	/**
+	 * SELECT asi_id, xx, yy 
+	FROM crosstab(
+	  $$select m_attributesetinstance_id, m_attribute_id, "value"
+	   from m_attributeinstance
+	   where m_attributesetinstance_id > 1000 order by 1, 2$$ )
+	AS ct(asi_id numeric(10, 0), xx character varying(40), yy character varying(40));
+	 * @param m_M_Product_ID
+	 * @return
+	 */
+	protected String buildQueryAsi (int m_M_Product_ID, int [] lsAsiID){
+		StringBuilder sqlFromBuild = new StringBuilder();
+		// build crosstab clause. it like a subquery give a table alias
+		StringBuilder sqlCrosstabTable = new StringBuilder();
+		StringBuilder sqlCrosstabOrder = new StringBuilder();
+		
+		MProduct product = MProduct.get(Env.getCtx(), m_M_Product_ID);
+		MAttributeSet as = product.getAttributeSet();
+		// order by id to match with pivot query
+		MAttribute[] lsAttributeInstance = as.getMAttributes(true, true);
+		if (lsAttributeInstance.length > 0){
+			StringBuilder sqlCrossTabBuild = new StringBuilder();
+			sqlCrossTabBuild.append("asi_id NUMERIC(10, 0)");
+			for (MAttribute attr : lsAttributeInstance){
+				// name of column must start by letter, so use c+id as column name
+				//sqlSelectBuild.append (", c");
+				//sqlSelectBuild.append (String.valueOf(attr.get_ID()));
+				sqlCrossTabBuild.append(", c");
+				sqlCrossTabBuild.append(String.valueOf(attr.get_ID()));
+				sqlCrossTabBuild.append(" CHARACTER VARYING (40)");
+				sqlCrosstabOrder.append("c");
+				sqlCrosstabOrder.append(String.valueOf(attr.get_ID()));
+				sqlCrosstabOrder.append(",");
+			}
+			sqlCrosstabOrder.deleteCharAt(sqlCrosstabOrder.length()-1);
+			sqlCrosstabTable.append("\ncrosstab(");
+			sqlCrosstabTable.append("\n    $$SELECT m_attributesetinstance_id AS asiID, m_attribute.m_attribute_id, \"value\"");
+			sqlCrosstabTable.append("\n    FROM m_attributeinstance INNER JOIN m_attribute ON (m_attributeinstance.m_attribute_id = m_attribute.m_attribute_id AND m_attribute.isinstanceattribute = 'Y')");
+			
+			sqlCrosstabTable.append("\n    WHERE m_attributesetinstance_id ");
+			appendINClause (sqlCrosstabTable, lsAsiID);
+	
+			sqlCrosstabTable.append("\n$$");
+			sqlCrosstabTable.append("\n)AS atrNames (");
+			sqlCrosstabTable.append(sqlCrossTabBuild);
+			sqlCrosstabTable.append(")");
+		}
+		
+		// append lot, serial, ... 
+		if (lsAttributeInstance.length > 0){
+			sqlFromBuild.append(sqlCrosstabTable);
+			sqlFromBuild.append("\n    INNER JOIN m_attributesetinstance asi ON (asi.m_attributesetinstance_id = atrNames.asi_id) ");
+		}else{
+			sqlFromBuild.append("\n    (SELECT * FROM m_attributesetinstance WHERE m_attributesetinstance_id ");
+			appendINClause (sqlFromBuild, lsAsiID);
+			sqlFromBuild.append("\n    )AS asi");
+		
+		}	
+		
+		int warehouseID = Env.getContextAsInt(Env.getCtx(), m_WindowNo, "M_Warehouse_ID");
+		boolean useWarehouse = showOnlyCurrentWarehouse.isChecked() && warehouseID > 0;
+		if (useWarehouse){
+			sqlFromBuild.append("\n    INNER JOIN");
+		}else{
+			sqlFromBuild.append("\n    LEFT OUTER JOIN");
+		}
+		
+		sqlFromBuild.append("(SELECT sum (qtyonhand) AS qty, m_attributesetinstance_id, m_product_id FROM m_storageonhand ");
+		sqlFromBuild.append("\n    INNER JOIN m_locator ON (m_storageonhand.m_locator_id = m_locator.m_locator_id) ");
+		sqlFromBuild.append("\n    WHERE m_attributesetinstance_id IN (");
+		for (int asiID : lsAsiID){
+			sqlFromBuild.append(asiID);
+			sqlFromBuild.append(",");
+		}
+		sqlFromBuild.deleteCharAt(sqlFromBuild.length()-1);
+		sqlFromBuild.append(")");
+		
+		sqlFromBuild.append("\n    AND m_product_id = ");
+		sqlFromBuild.append(m_M_Product_ID);
+		
+		if (useWarehouse){
+			sqlFromBuild.append("\n    AND m_warehouse_id = ");
+			sqlFromBuild.append(warehouseID);
+		}
+		
+		sqlFromBuild.append("\n    GROUP BY m_product_id, m_attributesetinstance_id) AS onhand");
+		sqlFromBuild.append("\n    ON onhand.m_attributesetinstance_id = asi.m_attributesetinstance_id");
+		
+		sqlFromBuild.append("\n    LEFT OUTER JOIN m_lot ON (m_lot.m_lot_id = asi.m_lot_id)");
+		
+		StringBuilder sqlWhereBuild = new StringBuilder();
+		if (showOnlyQtyPositive.isChecked()){
+			sqlFromBuild.append ("\n    WHERE qty > 0");
+		}
+		
+		if (sqlWhereBuild.length() > 0){
+			sqlFromBuild.append(sqlWhereBuild);
+		}
+		
+		sqlFromBuild.append("\n    ORDER BY m_lot.m_lot_id DESC");
+		if (sqlCrosstabOrder.length() > 0){
+			sqlFromBuild.append(",");
+			sqlFromBuild.append(sqlCrosstabOrder);
+		}
+		sqlFromBuild.append(", asi.m_attributesetinstance_id DESC");
+		
+		return sqlFromBuild.toString();
+	}
+	
+	protected void appendINClause (StringBuilder sqlFromBuild, int [] lsAsiID){
+		sqlFromBuild.append ("   IN ( ");
+		for (int asiID : lsAsiID){
+			sqlFromBuild.append(asiID);
+			sqlFromBuild.append(",");
+		}
+		sqlFromBuild.deleteCharAt(sqlFromBuild.length()-1);
+		sqlFromBuild.append(")");
+	}
+	
+	protected int [] listExitsAsi (int m_M_Product_ID){
+		return DB.getIDsEx (null, "SELECT m_attributesetinstance_id FROM m_asi_v WHERE m_product_id = ?", m_M_Product_ID);
+	}
 	/**
 	 * 	Dynamic Init
 	 * 	@param C_BPartner_ID BP
@@ -207,86 +349,40 @@ public class WPAttributeInstance extends Window implements EventListener<Event>
 	private void dynInit(int C_BPartner_ID)
 	{
 		if (log.isLoggable(Level.CONFIG)) log.config("C_BPartner_ID=" + C_BPartner_ID);
-		if (C_BPartner_ID != 0)
-		{
-			int ShelfLifeMinPct = 0;
-			int ShelfLifeMinDays = 0;
-			String sql = "SELECT bp.ShelfLifeMinPct, bpp.ShelfLifeMinPct, bpp.ShelfLifeMinDays "
-				+ "FROM C_BPartner bp "
-				+ " LEFT OUTER JOIN C_BPartner_Product bpp"
-				+	" ON (bp.C_BPartner_ID=bpp.C_BPartner_ID AND bpp.M_Product_ID=?) "
-				+ "WHERE bp.C_BPartner_ID=?";
-			PreparedStatement pstmt = null;
-			ResultSet rs = null;
-			try
-			{
-				pstmt = DB.prepareStatement(sql, null);
-				pstmt.setInt(1, m_M_Product_ID);
-				pstmt.setInt(2, C_BPartner_ID);
-				rs = pstmt.executeQuery();
-				if (rs.next())
-				{
-					ShelfLifeMinPct = rs.getInt(1);		//	BP
-					int pct = rs.getInt(2);				//	BP_P
-					if (pct > 0)	//	overwrite
-						ShelfLifeMinDays = pct;
-					ShelfLifeMinDays = rs.getInt(3);
-				}
-			}
-			catch (Exception e)
-			{
-				log.log(Level.SEVERE, sql, e);
-			}
-			finally {
-				DB.close(rs, pstmt);
-				rs = null; pstmt = null;
-			}
-			if (ShelfLifeMinPct > 0)
-			{
-				m_sqlMinLife = " AND COALESCE(TRUNC(((daysbetween(asi.GuaranteeDate, getDate()))/p.GuaranteeDays)*100),0)>=" + ShelfLifeMinPct;
-				if (log.isLoggable(Level.CONFIG)) log.config( "PAttributeInstance.dynInit - ShelfLifeMinPct=" + ShelfLifeMinPct);
-			}
-			if (ShelfLifeMinDays > 0)
-			{
-				m_sqlMinLife += " AND COALESCE((daysbetween(asi.GuaranteeDate, getDate())),0)>=" + ShelfLifeMinDays;
-				if (log.isLoggable(Level.CONFIG)) log.config( "PAttributeInstance.dynInit - ShelfLifeMinDays=" + ShelfLifeMinDays);
-			}
-		}	//	BPartner != 0
 
-		m_sql = m_table.prepareTable (s_layout, s_sqlFrom, 
-					m_M_Warehouse_ID == 0 ? s_sqlWhereWithoutWarehouse : s_sqlWhere, false, "s")
-				+ " ORDER BY asi.GuaranteeDate, s.QtyOnHand";	//	oldest, smallest first
+		updateQuery();
+		
 		//
 		m_table.addEventListener(Events.ON_SELECT, this);
 		//
 		refresh();
 	}	//	dynInit
 
+	protected void updateQuery() {
+		int lsExitsAsi [] = listExitsAsi(m_M_Product_ID);
+		if (lsExitsAsi.length == 0)
+			return;
+		
+		m_sql =m_table.prepareTable (getColumnAsiList(m_M_Product_ID), buildQueryAsi(m_M_Product_ID, lsExitsAsi), null, false, null, false);
+		
+		if (m_sql.trim().endsWith("WHERE")) {
+			m_sql = m_sql.trim();
+			m_sql = m_sql.substring(0, m_sql.length() - 5);
+		}
+	}
+	
 	/**
 	 * 	Refresh Query
 	 */
 	private void refresh()
 	{
 		String sql = m_sql;
-		int pos = m_sql.lastIndexOf(" ORDER BY ");
-		if (!showAll.isChecked())
-		{
-			sql = m_sql.substring(0, pos) 
-				+ m_sqlNonZero;
-			if (m_sqlMinLife.length() > 0)
-				sql += m_sqlMinLife;
-			sql += m_sql.substring(pos);
-		}
-		//
 		log.finest(sql);
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try
 		{
 			pstmt = DB.prepareStatement(sql, null);
-			pstmt.setInt(1, m_M_Product_ID);
-			if (m_M_Warehouse_ID != 0)
-				pstmt.setInt(2, m_M_Warehouse_ID);
 			rs = pstmt.executeQuery();
 			m_table.loadTable(rs);
 		}
@@ -311,8 +407,9 @@ public class WPAttributeInstance extends Window implements EventListener<Event>
 			m_M_AttributeSetInstance_ID = -1;
 			m_M_AttributeSetInstanceName = null;
 		}
-		else if (e.getTarget() == showAll)
+		else if (e.getTarget() == showAll || e.getTarget() == showOnlyCurrentWarehouse || e.getTarget() == showOnlyQtyPositive)
 		{
+			updateQuery();
 			refresh();
 		}
 		else if (e.getTarget() == m_table)
@@ -338,13 +435,13 @@ public class WPAttributeInstance extends Window implements EventListener<Event>
 			{
 				m_M_AttributeSetInstance_ID = ID.intValue();
 				m_M_AttributeSetInstanceName = (String)m_table.getValueAt(row, 1);
-				//
+				/*
 				Object oo = m_table.getValueAt(row, 5);
 				if (oo instanceof KeyNamePair)
 				{
 					KeyNamePair pp = (KeyNamePair)oo;
 					m_M_Locator_ID = pp.getKey();
-				}
+				}*/
 			}
 		}
 		confirmPanel.getButton("Ok").setEnabled(enabled);

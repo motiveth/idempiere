@@ -69,6 +69,7 @@ public class InvoicePrint extends SvrProcess
 	private String		m_PaymentRule = null;
 	private int	  	    m_C_PaymentTerm_ID = 0;
 	private String		m_DocStatus = null;
+	private boolean		p_UseWindowPrint = false;
 
 	protected volatile StringBuffer sql = new StringBuffer();
 	protected volatile List<Object> params = new ArrayList<Object>();
@@ -114,6 +115,8 @@ public class InvoicePrint extends SvrProcess
 				m_C_PaymentTerm_ID = para[i].getParameterAsInt();
 			else if (name.equals("DocStatus"))
 				m_DocStatus = (String)para[i].getParameter();
+			else if (name.equals("UseWindowPrint"))
+				p_UseWindowPrint = para[i].getParameterAsBoolean();
 			else
 				log.log(Level.SEVERE, "prepare - Unknown Parameter: " + name);
 		}
@@ -245,6 +248,7 @@ public class InvoicePrint extends SvrProcess
 					C_Invoice_ID,
 					C_BPartner_ID);
 				info.setCopies(copies);
+				info.setUseWindowPrint(p_UseWindowPrint);
 				ReportEngine re = new ReportEngine(getCtx(), format, query, info);
 				boolean printed = false;
 				if (p_EMailPDF)

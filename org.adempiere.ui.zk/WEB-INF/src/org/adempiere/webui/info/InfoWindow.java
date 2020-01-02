@@ -817,8 +817,14 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 					{
 						columnInfo = createLookupColumnInfo(tableInfos, gridFields.get(i), infoColumn);
 					}					
-				}
-				else  
+				}else if (DisplayType.PAttribute == infoColumn.getAD_Reference_ID()){
+					WEditor editor = null;
+					editor = WebEditorFactory.getEditor(gridFields.get(i), true);
+			        editor.setMandatory(false);
+			        editor.setReadWrite(false);
+			        editorMap.put(colSQL, editor);
+					columnInfo = new ColumnInfo(infoColumn.get_Translation("Name"), colSQL, ValueNamePair.class, (String)null);
+				}else  
 				{
 					columnInfo = new ColumnInfo(infoColumn.get_Translation("Name"), colSQL, DisplayType.getClass(infoColumn.getAD_Reference_ID(), true), infoColumn.isReadOnly() || haveNotProcess);
 				}

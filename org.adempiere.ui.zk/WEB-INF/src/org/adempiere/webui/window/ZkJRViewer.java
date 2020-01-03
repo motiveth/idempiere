@@ -28,6 +28,7 @@ import org.compiere.model.MRole;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MUser;
 import org.compiere.model.PrintInfo;
+import org.compiere.process.ProcessInfo;
 import org.compiere.tools.FileUtil;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
@@ -44,6 +45,7 @@ import org.zkoss.zk.ui.event.KeyEvent;
 import org.zkoss.zk.ui.ext.render.DynamicMedia;
 import org.zkoss.zul.Borderlayout;
 import org.zkoss.zul.Center;
+import org.zkoss.zul.Filedownload;
 import org.zkoss.zul.Iframe;
 import org.zkoss.zul.Listitem;
 import org.zkoss.zul.North;
@@ -64,6 +66,7 @@ import net.sf.jasperreports.engine.export.JRCsvExporter;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.engine.export.JRXlsExporter;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
+import net.sf.jasperreports.export.PdfExporterConfiguration;
 import net.sf.jasperreports.export.SimpleCsvExporterConfiguration;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleHtmlExporterOutput;
@@ -79,6 +82,7 @@ public class ZkJRViewer extends Window implements EventListener<Event>, ITabOnCl
 	 */
 	private static final long serialVersionUID = -812700088629098149L;
 
+	private ProcessInfo pi;
 	private JasperPrint jasperPrint;
 	private java.util.List<JasperPrint> jasperPrintList;
 	private boolean isList;
@@ -96,16 +100,15 @@ public class ZkJRViewer extends Window implements EventListener<Event>, ITabOnCl
 	private long prevKeyEventTime = 0;
 	private KeyEvent prevKeyEvent;
 
-	private String m_title; // local title - embedded windows clear the title
 	protected ToolBarButton		bArchive			= new ToolBarButton();
 	private PrintInfo			m_printInfo;
 	
 	private int mediaVersion = 0;
 	
-	public ZkJRViewer(JasperPrint jasperPrint, String title, PrintInfo printInfo) {
+	public ZkJRViewer(JasperPrint jasperPrint, ProcessInfo pi, PrintInfo printInfo) {
 		super();
-		this.setTitle(title);
-		m_title = title;
+		this.setTitle(pi.getTitle());
+		this.pi = pi;
 		this.jasperPrint = jasperPrint;
 		this.isList = false;
 		m_WindowNo = SessionManager.getAppDesktop().registerWindow(this);
@@ -114,10 +117,10 @@ public class ZkJRViewer extends Window implements EventListener<Event>, ITabOnCl
 		init();
 	}
 
-	public ZkJRViewer(java.util.List<JasperPrint> jasperPrintList, String title, PrintInfo printInfo) {
+	public ZkJRViewer(java.util.List<JasperPrint> jasperPrintList, ProcessInfo pi, PrintInfo printInfo) {
 		super();
-		this.setTitle(title);
-		m_title = title;
+		this.setTitle(pi.getTitle());
+		this.pi = pi;
 		this.jasperPrintList = jasperPrintList;
 		this.isList = true;
 		m_WindowNo = SessionManager.getAppDesktop().registerWindow(this);
@@ -251,6 +254,8 @@ public class ZkJRViewer extends Window implements EventListener<Event>, ITabOnCl
 		center.appendChild(iframe);
 
 		this.setBorder("normal");
+		if (pi.printOption == ProcessInfo.INTERACT_PRINT || pi.printOption == ProcessInfo.SILENT_PRINT)
+			Filedownload.save(media);
 	}
 
 	private String makePrefix(String name) {
@@ -296,13 +301,13 @@ public class ZkJRViewer extends Window implements EventListener<Event>, ITabOnCl
 			try {
 				attachment = getPDF();
 			} catch (Exception e) {
-				FDialog.error(m_WindowNo, this, e.getLocalizedMessage(), m_title);
+				FDialog.error(m_WindowNo, this, e.getLocalizedMessage(), pi.getTitle());
 				return;
 			}
 		}
 		String to = "";
 		MUser from = MUser.get(Env.getCtx(), Env.getAD_User_ID(Env.getCtx()));
-		String subject = m_title;
+		String subject = pi.getTitle();
 
 		WEMailDialog dialog = new WEMailDialog (Msg.getMsg(Env.getCtx(), "SendMail"),
 			from, to, subject, "", new FileDataSource(attachment));
@@ -355,7 +360,7 @@ public class ZkJRViewer extends Window implements EventListener<Event>, ITabOnCl
 			if ( "PDF".equals( reportType ) )
 			{
 				attachment = getPDF();
-				media = new AMedia(m_title + ".pdf", "pdf", "application/pdf", attachment, true);
+				media = new AMedia(pi.getTitle() + ".pdf", "pdf", "application/pdf", attachment, true);
 
 			} else if ("HTML".equals(reportType)) {
 				String path = System.getProperty("java.io.tmpdir");
@@ -381,7 +386,7 @@ public class ZkJRViewer extends Window implements EventListener<Event>, ITabOnCl
 				exporter.setExporterOutput(new SimpleHtmlExporterOutput(file));
 				exporter.setConfiguration(htmlConfig);
 		 	    exporter.exportReport();
-				media = new AMedia(m_title, "html", "text/html", file, false);
+				media = new AMedia(pi.getTitle(), "html", "text/html", file, false);
 			} else if ("XLS".equals(reportType)) {
 				String path = System.getProperty("java.io.tmpdir");
 				String prefix = null;
@@ -408,7 +413,7 @@ public class ZkJRViewer extends Window implements EventListener<Event>, ITabOnCl
 				exporterXLS.setExporterOutput(new SimpleOutputStreamExporterOutput(fos));
 				exporterXLS.setConfiguration(xlsConfig);
 				exporterXLS.exportReport();
-				media = new AMedia(m_title + ".xls", "xls", "application/vnd.ms-excel", file, true);
+				media = new AMedia(pi.getTitle() + ".xls", "xls", "application/vnd.ms-excel", file, true);
 
 			} else if ("XLSX".equals(reportType)) {
 				String path = System.getProperty("java.io.tmpdir");
@@ -436,7 +441,7 @@ public class ZkJRViewer extends Window implements EventListener<Event>, ITabOnCl
 				exporterXLSX.setExporterOutput(new SimpleOutputStreamExporterOutput(fos));
 				exporterXLSX.setConfiguration(xlsxConfig);
 				exporterXLSX.exportReport();
-				media = new AMedia(m_title + ".xlsx", "xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", file, true);
+				media = new AMedia(pi.getTitle() + ".xlsx", "xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", file, true);
 
 			}else if ("CSV".equals(reportType)) {
 				String path = System.getProperty("java.io.tmpdir");
@@ -459,7 +464,7 @@ public class ZkJRViewer extends Window implements EventListener<Event>, ITabOnCl
 				exporter.setExporterOutput(new SimpleWriterExporterOutput(fos));
 				exporter.exportReport();
 
-				media = new AMedia(m_title + ".csv", "csv", "application/csv", file, true);
+				media = new AMedia(pi.getTitle() + ".csv", "csv", "application/csv", file, true);
 
 			}else if ("SSV".equals(reportType)) {
 				String path = System.getProperty("java.io.tmpdir");
@@ -485,7 +490,7 @@ public class ZkJRViewer extends Window implements EventListener<Event>, ITabOnCl
 				exporter.setConfiguration(csvConfig);
 				exporter.exportReport();
 
-				media = new AMedia(m_title, "ssv", "application/ssv", file, true);
+				media = new AMedia(pi.getTitle(), "ssv", "application/ssv", file, true);
 			}
 		} finally {
 			Thread.currentThread().setContextClassLoader(cl);
@@ -515,6 +520,22 @@ public class ZkJRViewer extends Window implements EventListener<Event>, ITabOnCl
 			jasperPrintList = new ArrayList<>();
 			jasperPrintList.add(jasperPrint);
 		}
+		
+		if (pi.printOption == ProcessInfo.INTERACT_PRINT || pi.printOption == ProcessInfo.SILENT_PRINT){
+			StringBuilder builder = new StringBuilder ();
+			if (pi.printOption == ProcessInfo.SILENT_PRINT){
+				builder.append("var printFormat = {bUI: false, bSilent: true, bShrinkToFit: true};");
+			}else{
+				builder.append("var printFormat = {bUI: true, bSilent: false, bShrinkToFit: true};");
+			}
+			builder.append("try{if (typeof advancePrint != 'undefined'){advancePrint(printFormat);}else{this.print(printFormat);}}catch (err){app.alert({cMsg: 'Thong bao cai may in' + err.toString (), cTitle: 'Loi in an', nIcon:1, oDoc:this});}");
+			builder.append("this.closeDoc (true);");
+			context.setProperty (PdfExporterConfiguration.PROPERTY_PDF_JAVASCRIPT, builder.toString());
+			
+		}
+		context.setProperty ("net.sf.jasperreports.export.pdf.compressed", "true");
+		context.setProperty ("net.sf.jasperreports.export.pdf.force.svg.shapes", "true");
+		context.setProperty (PdfExporterConfiguration.PROPERTY_PDF_VERSION, "6");
 		exporter.setExporterInput(SimpleExporterInput.getInstance(jasperPrintList));
 		exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(file));
 		exporter.exportReport();

@@ -119,6 +119,7 @@ import org.zkoss.zk.ui.Session;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
+import org.zkoss.zk.ui.event.MouseEvent;
 import org.zkoss.zk.ui.sys.ExecutionCtrl;
 import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Column;
@@ -2685,7 +2686,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 	//
 
     @Override
-    public void onPrint() {
+    public void onPrint(Event oriEvent) {
     	final Callback<Boolean> postCallback = new Callback<Boolean>() {
 			@Override
 			public void onCallback(Boolean result) {
@@ -2699,7 +2700,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 			@Override
 			public void onCallback(Boolean result) {
 				if (result) {
-					onPrintCallback(postCallback);
+					onPrintCallback(postCallback, oriEvent);
 				}
 			}
 		};
@@ -2708,7 +2709,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
     	WindowValidatorManager.getInstance().fireWindowValidatorEvent(event, preCallback);
     }
     
-	private void onPrintCallback(final Callback<Boolean> postCallback) {
+	private void onPrintCallback(final Callback<Boolean> postCallback, final Event event) {
 		//Get process defined for this tab
 		final int AD_Process_ID = adTabbox.getSelectedGridTab().getAD_Process_ID();
 		//log.info("ID=" + AD_Process_ID);
@@ -2727,8 +2728,21 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 				if (result) {
 					int table_ID = adTabbox.getSelectedGridTab().getAD_Table_ID();
 					int record_ID = adTabbox.getSelectedGridTab().getRecord_ID();
-
-					final ProcessModalDialog dialog = new ProcessModalDialog(AbstractADWindowContent.this, getWindowNo(), AD_Process_ID,table_ID, record_ID, true);
+					int printOption = ProcessInfo.NORMAL_PRINT;
+					boolean isDirectPrint = "Y".equalsIgnoreCase(Env.getCtx().getProperty("IsDirectPrint", "N"));
+					
+					if (isDirectPrint){
+						printOption = ProcessInfo.SILENT_PRINT;
+					}
+					
+					if (event != null && event.getClass().equals(MouseEvent.class) && isDirectPrint){
+						MouseEvent clickEvent = (MouseEvent)event;
+						if (MouseEvent.SHIFT_KEY == (MouseEvent.SHIFT_KEY & clickEvent.getKeys())){
+							printOption = ProcessInfo.INTERACT_PRINT;
+						}
+					}
+					
+					final ProcessModalDialog dialog = new ProcessModalDialog(AbstractADWindowContent.this, getWindowNo(), AD_Process_ID,table_ID, record_ID, true, printOption);
 					if (dialog.isValid()) {
 						//dialog.setWidth("500px");
 						dialog.setBorder("normal");						

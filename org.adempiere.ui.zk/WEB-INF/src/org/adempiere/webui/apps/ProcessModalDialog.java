@@ -128,6 +128,10 @@ public class ProcessModalDialog extends AbstractProcessDialog implements EventLi
 		this(null, WindowNo, AD_Process_ID, tableId, recordId, autoStart);
 	}
 	
+	public ProcessModalDialog (EventListener<Event> listener, int WindowNo, int AD_Process_ID, int tableId, int recordId, boolean autoStart, int printOption){
+		this(listener, WindowNo, new ProcessInfo("", AD_Process_ID, tableId, recordId, printOption), autoStart);
+	}
+	
 	/**
 	 * Dialog to start a process/report
 	 * @param WindowNo
@@ -138,7 +142,7 @@ public class ProcessModalDialog extends AbstractProcessDialog implements EventLi
 	 */
 	public ProcessModalDialog (EventListener<Event> listener, int WindowNo, int AD_Process_ID, int tableId, int recordId, boolean autoStart)
 	{
-		this(listener, WindowNo, new ProcessInfo("", AD_Process_ID, tableId, recordId), autoStart);
+		this(listener, WindowNo, AD_Process_ID, tableId, recordId, autoStart, ProcessInfo.NORMAL_PRINT);
 	}
 
 	/**

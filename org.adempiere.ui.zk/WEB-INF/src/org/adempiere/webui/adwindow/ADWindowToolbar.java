@@ -62,6 +62,7 @@ import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.event.KeyEvent;
+import org.zkoss.zk.ui.event.MouseEvent;
 import org.zkoss.zk.ui.event.OpenEvent;
 import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.A;
@@ -144,6 +145,7 @@ public class ADWindowToolbar extends FToolbar implements EventListener<Event>
 
     private Map<Integer, ToolBarButton> keyMap = new HashMap<Integer, ToolBarButton>();
     private Map<Integer, ToolBarButton> altKeyMap = new HashMap<Integer, ToolBarButton>();
+    private Map<Integer, ToolBarButton> altShiftKeyMap = new HashMap<Integer, ToolBarButton>();
     private Map<Integer, ToolBarButton> ctrlKeyMap = new HashMap<Integer, ToolBarButton>();
 
     private List<ToolbarCustomButton> toolbarCustomButtons = new ArrayList<ToolbarCustomButton>();
@@ -468,6 +470,7 @@ public class ADWindowToolbar extends FToolbar implements EventListener<Event>
 		altKeyMap.put(VK_Z, btnIgnore);
 		altKeyMap.put(VK_R, btnReport);		
 		altKeyMap.put(VK_P, btnPrint);
+		altShiftKeyMap.put(VK_P, btnPrint);
 		altKeyMap.put(VK_O, btnProcess);
 		altKeyMap.put(VK_L, btnCustomize);
 	}
@@ -557,8 +560,19 @@ public class ADWindowToolbar extends FToolbar implements EventListener<Event>
 		    try
 		    {
 		        ToolbarListener tListener = listenerIter.next();
-		        Method method = tListener.getClass().getMethod(methodName, (Class[]) null);
-		        method.invoke(tListener, (Object[]) null);
+		        Method method = null;
+		        try{
+		        	method = tListener.getClass().getMethod(methodName, (Class[]) null);
+		        }catch (NoSuchMethodException ex){
+		        	// ignore to continue try to find method accept event parameter
+		        }
+		        
+		        if (method == null){
+		        	method = tListener.getClass().getMethod(methodName, new Class[]{Event.class});
+		        	method.invoke(tListener, event);
+		        }else{
+		        	method.invoke(tListener, (Object[]) null);
+		        }
 		    }
 		    catch (Exception e)
 		    {
@@ -820,6 +834,8 @@ public class ADWindowToolbar extends FToolbar implements EventListener<Event>
 			{
 				btn = btnQuickForm;
 			}
+		}else if (keyEvent.isAltKey() && !keyEvent.isCtrlKey() && keyEvent.isShiftKey()){
+			btn = altShiftKeyMap.get(keyEvent.getKeyCode());
 		}
 		fireButtonClickEvent(keyEvent, btn);
 	}
@@ -831,7 +847,20 @@ public class ADWindowToolbar extends FToolbar implements EventListener<Event>
         	prevKeyEvent = keyEvent;
 			keyEvent.stopPropagation();
 			if (!btn.isDisabled() && btn.isVisible()) {
-				Events.sendEvent(btn, new Event(Events.ON_CLICK, btn));
+				int ctrKeys = 0;
+				if (keyEvent.isAltKey()){
+					ctrKeys = ctrKeys | MouseEvent.ALT_KEY;
+				}
+					
+				if (keyEvent.isCtrlKey()){
+					ctrKeys = ctrKeys | MouseEvent.CTRL_KEY;
+				}
+				
+				if (keyEvent.isShiftKey()){
+					ctrKeys = ctrKeys | MouseEvent.SHIFT_KEY;
+				}
+				Event clickButtonEvent = new MouseEvent(Events.ON_CLICK, btn, null, ctrKeys);
+				Events.sendEvent(btn, clickButtonEvent);
 				//client side script to close combobox popup
 				String script = "var w=zk.Widget.$('#" + btn.getUuid()+"'); " +
 						"zWatch.fire('onFloatUp', w);";

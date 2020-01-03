@@ -59,8 +59,9 @@ public class ProcessInfo implements Serializable
 	 *  @param Table_ID AD_Table_ID
 	 *  @param Record_ID Record_ID
 	 */
-	public ProcessInfo (String Title, int AD_Process_ID, int Table_ID, int Record_ID)
+	public ProcessInfo (String Title, int AD_Process_ID, int Table_ID, int Record_ID, int printOption)
 	{
+		this.printOption = printOption;
 		setTitle (Title);
 		setAD_Process_ID(AD_Process_ID);
 		setTable_ID (Table_ID);
@@ -70,6 +71,15 @@ public class ProcessInfo implements Serializable
 		else
 			m_printPreview = false;
 	}   //  ProcessInfo
+
+	public static int NORMAL_PRINT = 0;// use embed pdf
+	public static int SILENT_PRINT = 1;// silent print
+	public static int INTERACT_PRINT = 2;// silent print
+	public int printOption = ProcessInfo.NORMAL_PRINT;
+
+	public ProcessInfo (String Title, int AD_Process_ID, int Table_ID, int Record_ID){
+		this (Title, AD_Process_ID, Table_ID, Record_ID, 0);
+	}
 
 	/** Process UUID			*/
 	private String				m_AD_Process_UU;

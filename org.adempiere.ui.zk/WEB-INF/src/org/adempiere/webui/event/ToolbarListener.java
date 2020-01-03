@@ -17,6 +17,8 @@
 
 package org.adempiere.webui.event;
 
+import org.zkoss.zk.ui.event.Event;
+
 /**
  *
  * @author  <a href="mailto:agramdass@gmail.com">Ashley G Ramdass</a>
@@ -73,7 +75,7 @@ public interface ToolbarListener
     /**
      * Print document
      */
-    public void onPrint();
+    public void onPrint(Event event);
 
     /**
      * View available report for current tab

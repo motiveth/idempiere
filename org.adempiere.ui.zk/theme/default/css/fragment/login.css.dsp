@@ -38,6 +38,19 @@
 	padding-bottom: 25px;
 }
 
+img[src*="/images/login-logo.png"]{
+	padding-left: 60px;
+}
+
+
+.about-main-panel-logo img[src*="/images/login-logo.png"]{
+	padding-left: 0px;	
+}
+
+img[src*="/images/header-logo.png"]{
+	height: 45px;
+}
+
 .login-box-footer {
 	background-image: url(../images/login-box-footer.png);
 	background-position: top right;

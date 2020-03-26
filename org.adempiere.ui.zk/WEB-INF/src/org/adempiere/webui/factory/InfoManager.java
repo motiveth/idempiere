@@ -80,4 +80,30 @@ public class InfoManager
         //
         return info;
     }
+
+	public static IInfoButtonSetting getInfoButtonSetting (InfoPanel infoPanel)
+	{
+		List<IInfoButtonSettingFactory> iButtonSettingFactoryList = Service.locator().list(IInfoButtonSettingFactory.class).getServices();
+		for(IInfoButtonSettingFactory iButtonSettingFactory : iButtonSettingFactoryList)
+		{
+			IInfoButtonSetting infoButtonSetting = iButtonSettingFactory.getInfoButtonSetting(infoPanel);
+			if (infoButtonSetting != null)
+				return infoButtonSetting;
+		}
+
+		return null;
+    }
+	
+	public static IInfoPrintHandle getInfoPrintHandle (InfoPanel infoPanel)
+    {
+		List<IInfoPrintHandleFactory> iInfoPrintHandleFactoryList = Service.locator().list(IInfoPrintHandleFactory.class).getServices();
+		for(IInfoPrintHandleFactory iInfoPrintHandleFactory : iInfoPrintHandleFactoryList)
+		{
+			IInfoPrintHandle infoButtonSetting = iInfoPrintHandleFactory.getInfoPrintHandle(infoPanel);
+			if (infoButtonSetting != null)
+				return infoButtonSetting;
+		}
+
+		return null;
+    }
 }

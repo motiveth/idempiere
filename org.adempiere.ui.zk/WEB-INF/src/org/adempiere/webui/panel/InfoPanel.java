@@ -62,6 +62,8 @@ import org.adempiere.webui.event.ValueChangeEvent;
 import org.adempiere.webui.event.ValueChangeListener;
 import org.adempiere.webui.event.WTableModelEvent;
 import org.adempiere.webui.event.WTableModelListener;
+import org.adempiere.webui.factory.IInfoButtonSetting;
+import org.adempiere.webui.factory.IInfoPrintHandle;
 import org.adempiere.webui.factory.InfoManager;
 import org.adempiere.webui.info.InfoWindow;
 import org.adempiere.webui.part.ITabOnSelectHandler;
@@ -176,7 +178,6 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 	 * {@link #syncSelectedAfterRequery()}
 	*/
 	protected boolean isRequeryByRunSuccessProcess = false;
-	
 	
     public static InfoPanel create (int WindowNo,
             String tableName, String keyColumn, String value,
@@ -358,6 +359,9 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 
 		confirmPanel = new ConfirmPanel(true, true, true, true, true, true);  // Elaine 2008/12/16 
 		confirmPanel.addComponentsLeft(confirmPanel.createButton(ConfirmPanel.A_NEW));
+		confirmPanel.addComponentsRight(confirmPanel.createButton(ConfirmPanel.A_PRINT));
+		confirmPanel.getButton(ConfirmPanel.A_PRINT);
+		confirmPanel.setVisible(ConfirmPanel.A_PRINT, false);
         confirmPanel.addActionListener(Events.ON_CLICK, this);
         ZKUpdateUtil.setHflex(confirmPanel, "1");
         if (ClientInfo.isMobile())
@@ -421,6 +425,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 	protected String              m_sqlMain;
 	/** Count SQL Statement		*/
 	protected String              m_sqlCount;
+	protected String              m_sqlSelectAllKeys;
 	/** Order By Clause         */
 	protected String              m_sqlOrder;
 	private String              m_sqlUserOrder;
@@ -604,6 +609,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
         p_layout = contentPanel.getLayout();
 		m_sqlMain = sql;
 		m_sqlCount = "SELECT COUNT(*) FROM " + from + " WHERE " + where;
+		m_sqlSelectAllKeys = "SELECT " +  p_layout[contentPanel.getKeyColumnIndex()].getColSQL() + " FROM " + from + " WHERE " + where;
 		//
 		m_sqlOrder = "";
 //		m_sqlUserOrder = "";
@@ -1380,35 +1386,29 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 		// clear result from prev time
 		m_viewIDMap.clear();
 		
-		if (p_multipleSelection)
+		Map <Integer, List<Object>> selectedRow = getSelectedRowInfo();
+		
+        for (Entry<Integer, List<Object>> selectedInfo : selectedRow.entrySet())
         {
-			Map <Integer, List<Object>> selectedRow = getSelectedRowInfo();
-			
-            for (Entry<Integer, List<Object>> selectedInfo : selectedRow.entrySet())
-            {
-            	// get key data column
-                Integer keyData = selectedInfo.getKey();
-                
-                if (infoCulumnId > 0){
-                	// have viewID, get it
-                	int dataIndex = columnDataIndex.get(infoCulumnId) + p_layout.length;
-                	
-            		// get row data from model
-					Object viewIDValue = selectedInfo.getValue().get(dataIndex);
-                	
-                	m_viewIDMap.add (new KeyNamePair(keyData, viewIDValue == null?null:viewIDValue.toString()));
-                }else{
-                	// hasn't viewID, set viewID value is null
-                	m_viewIDMap.add (new KeyNamePair(keyData, null));
-                }
-                
+        	// get key data column
+            Integer keyData = selectedInfo.getKey();
+            
+            if (infoCulumnId > 0){
+            	// have viewID, get it
+            	int dataIndex = columnDataIndex.get(infoCulumnId) + p_layout.length;
+            	
+        		// get row data from model
+				Object viewIDValue = selectedInfo.getValue().get(dataIndex);
+            	
+            	m_viewIDMap.add (new KeyNamePair(keyData, viewIDValue == null?null:viewIDValue.toString()));
+            }else{
+            	// hasn't viewID, set viewID value is null
+            	m_viewIDMap.add (new KeyNamePair(keyData, null));
             }
             
-            return m_viewIDMap;
-        }else{
-        	// never has this case, because when have process, p_multipleSelection always is true
-        	return null;
         }
+        
+        return m_viewIDMap;
 
 	}
 	
@@ -1706,13 +1706,16 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
     {
         return InfoPanel.lISTENER_EVENTS;
     }
-
+	
 	/**
 	 * enable all control button or disable all rely to selected record 
 	 */
 	protected void enableButtons (){
 		boolean enable = (contentPanel.getSelectedCount() > 0 || getSelectedRowInfo().size() > 0);
 		enableButtons(enable);
+		IInfoButtonSetting infoButtonSetting = InfoManager.getInfoButtonSetting(this);
+		if (infoButtonSetting != null)
+			infoButtonSetting.settingButton(this, this.m_infoWindowID, confirmPanel);
 	}
 	
 	// Elaine 2008/11/28
@@ -1872,6 +1875,8 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
             if (event.getTarget().equals(confirmPanel.getButton(ConfirmPanel.A_OK)))
             {
                 onOk();
+            }else if (event.getTarget().equals(confirmPanel.getButton(ConfirmPanel.A_PRINT))) {
+            	onPrint();
             }
             else if (event.getTarget() == contentPanel && event.getName().equals(Events.ON_SELECT))
             {
@@ -2467,6 +2472,71 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 		}
 	}
 
+    protected void onPrint() {
+    	IInfoPrintHandle infoPrintHandle = InfoManager.getInfoPrintHandle(this);
+    	if (infoPrintHandle != null)
+    		infoPrintHandle.handlePrintClick(m_infoWindowID, this);
+    }
+    
+    /**
+     * KeyNamePair: 
+     * 		key = id of record
+     * 		name = value of column treat as key of record on view
+     * current don't support "key of record on view" on print
+     */
+    public Collection<KeyNamePair> getSelectedKeyForPrint (boolean isSelectAll) {
+    	if (isSelectAll) {
+    		return getAllRecordKey();
+    	}else {
+    		return getSaveKeys(0);
+    	}
+    }
+    
+    protected Collection<KeyNamePair> getAllRecordKey () {
+    	String dynWhere = getSQLWhere();
+		StringBuilder sql = new StringBuilder (m_sqlSelectAllKeys);
+
+		if (dynWhere.length() > 0)
+			sql.append(dynWhere);   //  includes first AND
+
+		String selectAllKeysSql = Msg.parseTranslation(Env.getCtx(), sql.toString());	//	Variables
+		if (selectAllKeysSql.trim().endsWith("WHERE")) {
+			selectAllKeysSql = selectAllKeysSql.trim();
+			selectAllKeysSql = selectAllKeysSql.substring(0, selectAllKeysSql.length() - 5);
+		}
+		selectAllKeysSql = MRole.getDefault().addAccessSQL	(selectAllKeysSql, getTableName(), MRole.SQL_FULLYQUALIFIED, MRole.SQL_RO);
+		if (log.isLoggable(Level.FINER))
+			log.finer(selectAllKeysSql);
+
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		Collection<KeyNamePair> allKeys = new ArrayList<>();
+		try
+		{
+			pstmt = DB.prepareStatement(selectAllKeysSql, null);
+			setParameters (pstmt, true);
+			rs = pstmt.executeQuery();
+
+			while (rs.next()) {
+				KeyNamePair keyPair = new KeyNamePair(rs.getInt(1), null);
+				allKeys.add(keyPair);
+			}
+				
+		}
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, selectAllKeysSql, e);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null;
+			pstmt = null;
+		}
+		
+		return allKeys;
+    }
+    
     private void onDoubleClick()
 	{
 		if (isLookup())

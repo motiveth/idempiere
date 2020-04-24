@@ -232,13 +232,21 @@ public class GenericPOElementHandler extends AbstractElementHandler {
 
 				boolean createElement = isPackOutElement(ctx, po);
 				if (createElement) {
-					if (po.get_ID() > 0) {
-						ElementHandler handler = ctx.packOut.getHandler(po.get_TableName());
-						if (handler != null && !handler.getClass().equals(this.getClass()) ) {
-							handler.packOut(ctx.packOut, document, ctx.logDocument, po.get_ID());
+
+					ElementHandler handler = ctx.packOut.getHandler(po.get_TableName());
+					if (handler != null && !handler.getClass().equals(this.getClass())) {
+						int id = po.get_ValueAsInt(po.get_TableName() + "_ID");
+						String uuID = po.get_ValueAsString(po.getUUIDColumnName());
+						
+						if (id > 0) {
+							handler.packOut(ctx.packOut, document, ctx.logDocument, id);
+							createElement = false;
+						}else if (uuID != null) {
+							handler.packOut(ctx.packOut, document, ctx.logDocument, id, uuID);
 							createElement = false;
 						}
 					}
+
 					if (createElement) {
 						verifyPackOutRequirement(po);
 						List<String> excludes = defaultExcludeList(mainTable);

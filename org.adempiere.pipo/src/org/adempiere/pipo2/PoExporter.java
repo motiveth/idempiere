@@ -6,6 +6,7 @@ import java.util.List;
 import javax.xml.transform.sax.TransformerHandler;
 
 import org.adempiere.exceptions.AdempiereException;
+import org.compiere.model.I_AD_Org;
 import org.compiere.model.MTable;
 import org.compiere.model.MTree;
 import org.compiere.model.PO;
@@ -201,7 +202,8 @@ public class PoExporter {
 						addString("AD_Org_ID", "@AD_Org_ID@", new AttributesImpl());
 					else {
 						addTableReference("AD_Client_ID", X_AD_Client.Table_Name, new AttributesImpl());
-						addTableReference("AD_Org_ID", X_AD_Org.Table_Name, new AttributesImpl());
+						if (!(I_AD_Org.Table_Name.equals(po.get_TableName())))
+							addTableReference("AD_Org_ID", X_AD_Org.Table_Name, new AttributesImpl());
 					}
 				}
 			}

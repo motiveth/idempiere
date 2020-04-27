@@ -67,7 +67,7 @@ public class RoleElementHandler extends AbstractElementHandler {
 		if (mRole == null) {
 			mRole = new MRole(ctx.ctx, 0, getTrxName(ctx));
 		}
-		
+		mRole.suppendAutoGenerateRight = true;
 		PoFiller filler = new PoFiller(ctx, mRole, element, this);
 		List<String> notfounds = filler.autoFill(excludes);
 		if (notfounds.size() > 0) {

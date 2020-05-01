@@ -173,7 +173,7 @@ public class PoExporter {
 	}
 
 	public void export(List<String> excludes) {
-		export(excludes, false);
+		export(excludes, true);
 	}
 
 	public void export(List<String> excludes, boolean preservedOrg) {

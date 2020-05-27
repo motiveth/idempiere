@@ -50,12 +50,14 @@ import org.compiere.db.CConnection;
 import org.compiere.db.Database;
 import org.compiere.db.ProxyFactory;
 import org.compiere.model.MAcctSchema;
+import org.compiere.model.MClient;
 import org.compiere.model.MLanguage;
 import org.compiere.model.MRole;
 import org.compiere.model.MSequence;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MSystem;
 import org.compiere.model.MTable;
+import org.compiere.model.MUser;
 import org.compiere.model.PO;
 import org.compiere.model.POResultSet;
 import org.compiere.process.ProcessInfo;
@@ -223,22 +225,25 @@ public final class DB
 	//	if (mailPassword == null || mailPassword.length() == 0)
 	//		return;
 		//
-		StringBuilder sql = new StringBuilder("UPDATE AD_Client SET")
-			.append(" SMTPHost=").append(DB.TO_STRING(server))
-			.append(", RequestEMail=").append(DB.TO_STRING(adminEMail))
-			.append(", RequestUser=").append(DB.TO_STRING(mailUser))
-			.append(", RequestUserPW=").append(DB.TO_STRING(mailPassword))
-			.append(", IsSMTPAuthorization='Y' WHERE AD_Client_ID=0");
-		int no = DB.executeUpdate(sql.toString(), null);
-		if (log.isLoggable(Level.FINE)) log.fine("Client #"+no);
+		MClient sysClient = MClient.get(Env.getCtx(), 0);
+		sysClient.setRequestEMail(adminEMail);
+		sysClient.setSMTPHost(server);
+		sysClient.setRequestUser(mailUser);
+		sysClient.setRequestUserPW(mailPassword);
+		sysClient.setIsSmtpAuthorization(true);
+		sysClient.saveEx();
 		//
-		sql = new StringBuilder("UPDATE AD_User SET ")
-			.append(" EMail=").append(DB.TO_STRING(adminEMail))
-			.append(", EMailUser=").append(DB.TO_STRING(mailUser))
-			.append(", EMailUserPW=").append(DB.TO_STRING(mailPassword))
-			.append(" WHERE AD_User_ID IN (0,100)");
-		no = DB.executeUpdate(sql.toString(), null);
-		if (log.isLoggable(Level.FINE)) log.fine("User #"+no);
+		MUser sysUser = MUser.get(Env.getCtx(), 0);
+		sysUser.setEMail(adminEMail);
+		sysUser.setEMailUser(mailUser);
+		sysUser.setEMailUserPW(mailPassword);
+		sysUser.saveEx();
+		
+		sysUser = MUser.get(Env.getCtx(), 100);
+		sysUser.setEMail(adminEMail);
+		sysUser.setEMailUser(mailUser);
+		sysUser.setEMailUserPW(mailPassword);
+		sysUser.saveEx();
 		//
 		try
 		{

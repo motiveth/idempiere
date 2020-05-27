@@ -19,6 +19,7 @@ import java.awt.Rectangle;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.compiere.apps.wf.IWFNodeWidget;
 import org.compiere.apps.wf.WFGraphLayout;
 import org.compiere.apps.wf.WFNodeWidget;
 import org.compiere.apps.wf.WorkflowGraphScene;
@@ -31,6 +32,7 @@ import org.netbeans.api.visual.graph.GraphScene;
 import org.netbeans.api.visual.graph.layout.GraphLayout;
 import org.netbeans.api.visual.layout.LayoutFactory;
 import org.netbeans.api.visual.layout.SceneLayout;
+import org.netbeans.api.visual.widget.Widget;
 
 /**
  *
@@ -142,7 +144,7 @@ public class WFNodeContainer
 			}
 		}
 
-		WFNodeWidget w = (WFNodeWidget) graphScene.addNode(node.getAD_WF_Node_ID());
+		IWFNodeWidget w = (IWFNodeWidget) graphScene.addNode(node.getAD_WF_Node_ID());
 		w.setColumn(currentColumn);
 		w.setRow(currentRow);
 
@@ -171,11 +173,11 @@ public class WFNodeContainer
 	 * @param column column #, starting from 1
 	 * @return WFNodeWidget
 	 */
-	public WFNodeWidget findWidget(int row, int column) {
-		WFNodeWidget widget = null;
+	public IWFNodeWidget findWidget(int row, int column) {
+		IWFNodeWidget widget = null;
 		Integer[] nodeRow = matrix.get(row);
 		if (nodeRow != null && column <= nodeRow.length) {
-			widget = (WFNodeWidget) graphScene.findWidget(nodeRow[column - 1]);
+			widget = (IWFNodeWidget)graphScene.findWidget(nodeRow[column - 1]);
 		}
 		return widget;
 	}

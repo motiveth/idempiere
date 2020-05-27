@@ -31,7 +31,7 @@ import org.netbeans.api.visual.widget.Widget;
  * @author hengsin
  *
  */
-public class WFNodeWidget extends Widget {
+public class WFNodeWidget extends Widget implements IWFNodeWidget{
 
 	public final static int NODE_WIDTH = 150;
 	public final static int NODE_HEIGHT = 100;

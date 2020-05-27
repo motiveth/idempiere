@@ -31,6 +31,7 @@ import org.adempiere.webui.event.DialogEvents;
 import org.adempiere.webui.panel.ADForm;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.ZKUpdateUtil;
+import org.compiere.apps.wf.IWFNodeWidget;
 import org.compiere.apps.wf.WFGraphLayout;
 import org.compiere.apps.wf.WFNodeWidget;
 import org.compiere.model.MRole;
@@ -327,7 +328,7 @@ public class WFEditor extends ADForm {
 						td.appendChild(image);
 						String imgStyle = "border:none;margin:0;padding:0";
 
-						WFNodeWidget widget = nodeContainer.findWidget(i+1, c+1);
+						IWFNodeWidget widget = nodeContainer.findWidget(i+1, c+1);
 						if (widget != null)
 						{
 							MWFNode node = widget.getModel();

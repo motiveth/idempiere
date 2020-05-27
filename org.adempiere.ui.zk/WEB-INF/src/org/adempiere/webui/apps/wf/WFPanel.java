@@ -23,6 +23,7 @@ import org.adempiere.webui.panel.IHelpContext;
 import org.adempiere.webui.part.WindowContainer;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.util.ZKUpdateUtil;
+import org.compiere.apps.wf.IWFNodeWidget;
 import org.compiere.apps.wf.WFGraphLayout;
 import org.compiere.apps.wf.WFNodeWidget;
 import org.compiere.model.X_AD_CtxHelp;
@@ -207,7 +208,7 @@ public class WFPanel extends Borderlayout implements EventListener<Event>, IHelp
 					image.setContent(t);
 					td.appendChild(image);
 
-					WFNodeWidget widget = nodeContainer.findWidget(i+1, c+1);
+					IWFNodeWidget widget = nodeContainer.findWidget(i+1, c+1);
 					if (widget != null)
 					{
 						MWFNode node = widget.getModel();

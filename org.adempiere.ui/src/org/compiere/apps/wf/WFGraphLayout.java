@@ -30,7 +30,7 @@ public class WFGraphLayout extends GraphLayout<Integer, MWFNodeNext> {
 			Collection<Integer> nodes) {
 
 		for(Integer node : nodes) {
-			WFNodeWidget widget = (WFNodeWidget) graph.getScene().findWidget(node);
+			IWFNodeWidget widget = (IWFNodeWidget) graph.getScene().findWidget(node);
 			int x = (widget.getColumn() - 1) * COLUMN_WIDTH;
 			int y = (widget.getRow() - 1) * ROW_HEIGHT;
 			Point point = new Point(x, y);

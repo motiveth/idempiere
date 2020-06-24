@@ -49,7 +49,7 @@ public class SQLStatementElementHandler extends AbstractElementHandler {
 		String sql = getStringValue(element, "statement");
 		if (sql.endsWith(";") && !(sql.toLowerCase().endsWith("end;")))
 			sql = sql.substring(0, sql.length() - 1);
-		sql=Env.parseContext(Env.getCtx(), 0, sql, false);  // tbayen IDEMPIERE-2140
+		sql = sqlParseContext (sql);
 		Savepoint savepoint = null;
 		int count = 0;
 		PreparedStatement pstmt = null;
@@ -176,5 +176,42 @@ public class SQLStatementElementHandler extends AbstractElementHandler {
 		this.create(packout.getCtx(), packoutHandler);
 		packout.getCtx().ctx.remove(SQLElementParameters.SQL_STATEMENT);
 		packout.getCtx().ctx.remove(SQLElementParameters.DB_TYPE);
+	}
+
+	/**IDEMPIERE-2140
+	 * replace context in sql and replace escape string
+	 * @param sql
+	 * @return
+	 */
+	public String sqlParseContext (String sql){
+		String escStr = "@@";
+		if (sql != null && sql.trim().length() != 0 && sql.indexOf(escStr) > 0){
+			StringBuilder escBuild = new StringBuilder();
+			String [] escedArr = sql.split(escStr, -1);
+			boolean isFirstPart = true;
+			for (String escedPart : escedArr){
+				if (!isFirstPart){
+					escBuild.append("@");
+				}
+				
+				isFirstPart = false;
+				
+				if ("".equals(escedPart)){// it's part 2nd in string "start@@@@end", because its number always > 1, so next loop will append @
+					continue;
+				}
+				
+				escedPart = Env.parseContext(Env.getCtx(), 0, escedPart, false); // parse context for part without esc character
+				if ("".equals(escedPart)){// parse context error
+					sql = "";
+					break;
+				}
+				
+				escBuild.append(escedPart); // reconnect after parse
+			}
+			sql = escBuild.toString();
+		}else
+			sql=Env.parseContext(Env.getCtx(), 0, sql, false);  // tbayen IDEMPIERE-2140
+		
+		return sql;
 	}
 }

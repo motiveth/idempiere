@@ -6,6 +6,7 @@ Bundle-Version: 7.1.0.qualifier
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version>=11))"
 Import-Package: org.apache.commons.codec,
  org.apache.commons.codec.binary,
+ org.apache.commons.lang3;version="3.1.0",
  org.apache.tools.ant,
  org.apache.tools.ant.taskdefs,
  org.apache.xerces.jaxp,

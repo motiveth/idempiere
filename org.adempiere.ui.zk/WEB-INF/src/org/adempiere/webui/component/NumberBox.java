@@ -70,6 +70,10 @@ public class NumberBox extends Div
 		this(integral, false);
 	}
 	
+	public void SelectionAllText (){
+		decimalBox.setSelectionRange(0, decimalBox.getText().length());
+	}
+	
     /**
      * 
      * @param integral

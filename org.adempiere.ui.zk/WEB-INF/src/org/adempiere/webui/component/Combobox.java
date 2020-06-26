@@ -117,28 +117,41 @@ public class Combobox extends org.zkoss.zul.Combobox implements IdSpace
             return ;
         }
         
-        List<Comboitem> items = getItems();
-        for (Comboitem item : items)
+        Comboitem item = getItemByValue(value);
+        if(item != null)
+        	setSelectedItem(item);
+    }
+    
+    public void removeItemByValue(Object value){
+    	Comboitem item = getItemByValue(value);
+    	if (item != null)
+    		removeItemAt(getItems().indexOf(item));
+    }
+    
+    public Comboitem getItemByValue(Object value) {
+    	List<Comboitem> items = getItems();
+
+    	for (int i = 0; i < items.size(); i++)
         {
+    		Comboitem item = items.get(i);
         	if (value.getClass() != item.getValue().getClass()) {
         		// if the classes of value and item are different convert both to String
         		String stringValue = value.toString();
         		String stringItem = item.getValue().toString();
                 if (stringValue.equals(stringItem))
                 {
-                    setSelectedItem(item);
-                    break;
+                	return item;
                 }
         	} else {
                 if (value.equals(item.getValue()))
                 {
-                    setSelectedItem(item);
-                    break;
+                	return item;
                 }
         	}
         }
-    }
-    
+    	
+    	return null;
+	}
     /**
      * 
      * @param value

@@ -121,6 +121,11 @@ public class CostAdjustmentCalloutFactory implements IColumnCalloutFactory {
 			}
 			return null;
 		}
+
+		@Override
+		public boolean isBeforeDefault(String tableName, String columnName) {
+			return false;
+		}
 	}
 	
 	/**
@@ -180,6 +185,11 @@ public class CostAdjustmentCalloutFactory implements IColumnCalloutFactory {
 
 			}
 			return null;
+		}
+
+		@Override
+		public boolean isBeforeDefault(String tableName, String columnName) {
+			return false;
 		}
 		
 	}

@@ -1,0 +1,21 @@
+@@ -22,9 +22,11 @@
+ import java.util.ArrayList;
+ import java.util.HashMap;
+ import java.util.LinkedHashMap;
++import java.util.Map;
+ import java.util.concurrent.Future;
+ import java.util.logging.Level;
+ 
++import org.adempiere.util.Callback;
+ import org.adempiere.util.ContextRunnable;
+ import org.compiere.Adempiere;
+ import org.compiere.util.CLogMgt;
+@@ -308,7 +317,7 @@
+ 
+ 	public boolean isContainForSeachEditor (Object key){
+ 		if (m_loader == null)
+-			m_loader = new MLoader();
++			m_loader = new MLoader(completeLoad);
+ 		
+ 		return m_loader.getByKey(key) != null;
+ 	}

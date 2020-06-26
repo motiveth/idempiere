@@ -34,6 +34,9 @@ import org.adempiere.webui.AdempiereIdGenerator;
 import org.adempiere.webui.AdempiereWebUI;
 import org.adempiere.webui.ClientInfo;
 import org.adempiere.webui.LayoutUtils;
+import org.adempiere.webui.adwindow.validator.WindowValidatorEvent;
+import org.adempiere.webui.adwindow.validator.WindowValidatorEventType;
+import org.adempiere.webui.adwindow.validator.WindowValidatorManager;
 import org.adempiere.webui.apps.CalloutDialog;
 import org.adempiere.webui.component.Borderlayout;
 import org.adempiere.webui.component.Column;
@@ -1504,6 +1507,14 @@ DataStatusListener, IADTabpanel, IdSpace, IFieldEditorContainer
         	if (GridTable.DATA_REFRESH_MESSAGE.equals(e.getAD_Message()) || 
         		"Sorted".equals(e.getAD_Message())) {
         		listPanel.getListbox().invalidate();
+        	}
+        }
+        
+        if (GridTab.DEFAULT_STATUS_MESSAGE.equals(e.getAD_Message())){
+        	ADWindow win = ADWindow.get(windowNo);
+        	if (win != null) {
+        		WindowValidatorEvent event = new WindowValidatorEvent(win, WindowValidatorEventType.CHANGED_RECORD.getName());
+            	WindowValidatorManager.getInstance().fireWindowValidatorEvent(event, null);
         	}
         }
     }

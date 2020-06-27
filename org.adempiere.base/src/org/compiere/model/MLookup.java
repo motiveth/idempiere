@@ -65,9 +65,8 @@ public final class MLookup extends Lookup implements Serializable
 
 	Callback<Map<Object,Object>> completeLoad;
 	
-	public MLookup (MLookupInfo info, int TabNo, Callback<Map<Object,Object>> completeLoad){
-		this(info, TabNo);
-		this.completeLoad = completeLoad;
+	public MLookup (MLookupInfo info, int TabNo){
+		this(info, TabNo, null);
 	}
 	
 	/**
@@ -75,9 +74,10 @@ public final class MLookup extends Lookup implements Serializable
 	 *  @param info info
 	 *  @param TabNo tab no
 	 */
-	public MLookup (MLookupInfo info, int TabNo)
+	public MLookup (MLookupInfo info, int TabNo, Callback<Map<Object,Object>> completeLoad)
 	{
 		super(info.DisplayType, info.WindowNo);
+		this.completeLoad = completeLoad;
 		m_info = info;
 		if (log.isLoggable(Level.FINE)) log.fine(m_info.KeyColumn);
 
@@ -1096,6 +1096,8 @@ public final class MLookup extends Lookup implements Serializable
 						{
 							m_lookup.put(knp.getKey(), knp);
 						}
+						if (completeLoad != null)
+							completeLoad.onCallback(m_lookup);
 						return;
 					}
 				}
@@ -1115,6 +1117,8 @@ public final class MLookup extends Lookup implements Serializable
 						{
 							m_lookup.put(vnp.getValue(), vnp);
 						}
+						if (completeLoad != null)
+							completeLoad.onCallback(m_lookup);
 						return;
 					}
 			

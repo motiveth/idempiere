@@ -195,9 +195,6 @@
         <setEntry value="org.krysalis.barcode4j@default:default"/>
         <setEntry value="org.mortbay.jasper.apache-el@default:true"/>
         <setEntry value="org.mortbay.jasper.apache-jsp@default:true"/>
-        <setEntry value="org.objectweb.asm*7.0.0@default:default"/>
-        <setEntry value="org.objectweb.asm.commons*7.0.0@default:default"/>
-        <setEntry value="org.objectweb.asm.tree*7.0.0@default:default"/>
         <setEntry value="org.passay@default:default"/>
         <setEntry value="org.sat4j.core@default:default"/>
         <setEntry value="org.sat4j.pb@default:default"/>
@@ -209,7 +206,8 @@
         <setEntry value="org.w3c.dom.svg@default:default"/>
         <setEntry value="slf4j.api@default:default"/>
         <setEntry value="slf4j.jcl@default:false"/>
-        <setEntry value="stax2-api@default:default"/>
+        <setEntry value="stax2-api*4.1.0@default:default"/>
+        <setEntry value="stax2-api*4.2.0@default:default"/>
         <setEntry value="zjavassist@default:default"/>
     </setAttribute>
     <setAttribute key="selected_workspace_bundles">

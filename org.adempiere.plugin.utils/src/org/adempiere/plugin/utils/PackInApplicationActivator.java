@@ -15,6 +15,7 @@ package org.adempiere.plugin.utils;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FilenameFilter;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -82,13 +83,57 @@ public class PackInApplicationActivator extends AbstractActivator{
 			}
 		}
 	}
-	
+
 	private void installPackages(String folders) {
+		String filePaths[] = null;
+		if (folders.indexOf(";") > 0) {
+			filePaths = folders.split("[;]");
+		} else {
+			filePaths = new String[]{folders};
+		}
+		
+		for (String filePath : filePaths) {
+			filePath = filePath.trim();
+			File toProcess = new File(filePath.trim());
+			if (!toProcess.exists()) {
+				addLog(Level.WARNING, filePath + " does not exist");
+				continue;
+			}
+			
+			// get sub folder
+			if (toProcess.isDirectory() && filePath.endsWith(File.separator)) {
+				String [] subDirs = toProcess.list(new FilenameFilter() {
+					
+					@Override
+					public boolean accept(File dir, String name) {
+						if (dir.isDirectory())
+							return true;
+						
+						return false;
+					}
+				});
+				
+				Arrays.sort(subDirs, new Comparator<String>() {
+					@Override
+					public int compare(String f1, String f2) {
+						return f1.compareTo(f2);
+					}
+				});
+				
+				for (String subDir : subDirs) {
+					installPackagesOnSignFolder (filePath + subDir);
+				}
+			}else
+				installPackagesOnSignFolder (filePath);
+		}
+	}
+
+	private void installPackagesOnSignFolder(String folders) {
 		if (Util.isEmpty(folders, true)) {
 			setSummary(Level.INFO, "Not specified folders for automatic packin");
 			return;
 		}
-		
+		filesToProcess.clear();
 		File[] fileArray = getFilesToProcess(folders);
 		
 		if (fileArray.length <= 0) {

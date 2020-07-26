@@ -27,6 +27,7 @@ package org.adempiere.pipo2;
 import java.util.logging.Level;
 
 import org.adempiere.plugin.utils.PackInApplicationActivator;
+import org.compiere.model.MSysConfig;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.AdempiereSystemError;
@@ -52,7 +53,7 @@ public class PackInFolder extends SvrProcess {
 
 	/** Folder to apply		*/
 	private String p_Folder;
-
+	private boolean isUseConfigFolder = false;
 	/**
 	 *  Prepare - e.g., get Parameters.
 	 */
@@ -63,8 +64,14 @@ public class PackInFolder extends SvrProcess {
 				;
 			else if (name.equals("Folder"))
 				p_Folder = para.getParameterAsString();
+			else if ("UseConfigFolder".equals(name))
+				isUseConfigFolder = para.getParameterAsBoolean();
 			else
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
+			
+			if (Util.isEmpty(p_Folder, true) && isUseConfigFolder) {
+				p_Folder = MSysConfig.getValue(MSysConfig.AUTOMATIC_PACKIN_FOLDERS);
+			}
 		}
 	}	//	prepare
 

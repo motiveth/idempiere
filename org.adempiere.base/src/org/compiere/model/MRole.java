@@ -256,7 +256,7 @@ public final class MRole extends X_AD_Role
 	
 	private static final String ROLE_KEY = "org.compiere.model.DefaultRole";
 	
-	
+	public boolean suppendAutoGenerateRight = false;
 	/**************************************************************************
 	 * 	Standard Constructor
 	 *	@param ctx context
@@ -421,7 +421,7 @@ public final class MRole extends X_AD_Role
 	 */
 	public String updateAccessRecords (boolean reset)
 	{
-		if (isManual())
+		if (isManual() || suppendAutoGenerateRight)
 			return "-";
 		
 		String roleClientOrgUser = getAD_Role_ID() + ","

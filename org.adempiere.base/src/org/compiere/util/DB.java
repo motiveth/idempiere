@@ -344,11 +344,6 @@ public final class DB
 
 		//direct connection
 		boolean success = false;
-		CLogErrorBuffer eb = CLogErrorBuffer.get(false);
-		if (eb != null && eb.isIssueError())
-			eb.setIssueError(false);
-		else
-			eb = null;	//	don't reset
 		try
 		{
             Connection conn = getConnectionRW(createNew);   //  try to get a connection
@@ -363,8 +358,6 @@ public final class DB
 		{
 			success = false;
 		}
-		if (eb != null)
-			eb.setIssueError(true);
 		return success;
 	}   //  isConnected
 

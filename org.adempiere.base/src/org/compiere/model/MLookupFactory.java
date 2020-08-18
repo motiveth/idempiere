@@ -280,9 +280,10 @@ public class MLookupFactory
 		}*/
 
 		//	Add Security
-		if (needToAddSecurity)
+		if (needToAddSecurity) {
 			info.Query = MRole.getDefault(ctx, false).addAccessSQL(info.Query,
-				info.TableName, MRole.SQL_FULLYQUALIFIED, MRole.SQL_RO);
+					info.TableName, MRole.SQL_FULLYQUALIFIED, MRole.SQL_RO, "AD_OrgDoc_ID".equals(ColumnName));
+		}
 		//
 	//	s_log.finest("Query:  " + info.Query);
 	//	s_log.finest("Direct: " + info.QueryDirect);

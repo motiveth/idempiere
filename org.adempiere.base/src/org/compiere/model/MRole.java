@@ -1936,6 +1936,10 @@ public final class MRole extends X_AD_Role
 		return retValue;
 	}	//	getWorkflowAccess
 
+	public String addAccessSQL (String SQL, String TableNameIn, 
+			boolean fullyQualified, boolean rw) {
+		return addAccessSQL (SQL, TableNameIn, fullyQualified, rw, false);
+	}
 	
 	/*************************************************************************
 	 *	Appends where clause to SQL statement for Table
@@ -1947,7 +1951,7 @@ public final class MRole extends X_AD_Role
 	 *	@return				updated SQL statement
 	 */
 	public String addAccessSQL (String SQL, String TableNameIn, 
-		boolean fullyQualified, boolean rw)
+		boolean fullyQualified, boolean rw, boolean isOverAccessAllOrg)
 	{
 		StringBuilder retSQL = new StringBuilder();
 
@@ -1999,7 +2003,7 @@ public final class MRole extends X_AD_Role
 			retSQL.append(getClientWhere(rw));
 
 			//	Org Access
-			if (!isAccessAllOrgs())
+			if (!isAccessAllOrgs() && !isOverAccessAllOrg)
 			{
 				retSQL.append(" AND ");
 				String orgWhere = getOrgWhere(rw);

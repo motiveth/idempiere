@@ -17,7 +17,9 @@
 package org.adempiere.webui;
 
 import java.io.Serializable;
-import java.util.TimeZone;
+import java.time.ZoneId;
+import java.time.format.TextStyle;
+import java.util.Locale;
 
 import org.adempiere.webui.session.SessionManager;
 import org.compiere.util.Env;
@@ -46,7 +48,7 @@ public class ClientInfo implements Serializable {
 	public int screenHeight;
 	public int screenWidth;
 	public String orientation;
-	public TimeZone timeZone;
+	public ZoneId clientZoneId;
 	public String userAgent;
 	public boolean tablet;
 	public double devicePixelRatio;
@@ -68,7 +70,7 @@ public class ClientInfo implements Serializable {
 			.append(userAgent)
 			.append("\r\n")
 			.append("Time Zone: ")
-			.append(timeZone.getID())
+			.append(clientZoneId.getDisplayName(TextStyle.FULL_STANDALONE, Locale.getDefault()))
 			.append("\r\n")
 			.append("Screen Size: ")
 			.append(screenWidth)

@@ -459,7 +459,7 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
 			clientInfo.desktopXOffset = c.getDesktopXOffset();
 			clientInfo.desktopYOffset = c.getDesktopYOffset();
 			clientInfo.orientation = c.getOrientation();
-			clientInfo.timeZone = c.getTimeZone();			
+			clientInfo.clientZoneId = c.getZoneId();
 			String ua = Servlets.getUserAgent((ServletRequest) Executions.getCurrent().getNativeRequest());
 			clientInfo.userAgent = ua;
 			ua = ua.toLowerCase();

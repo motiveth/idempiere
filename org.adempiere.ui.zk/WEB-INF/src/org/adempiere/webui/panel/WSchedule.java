@@ -163,7 +163,7 @@ public class WSchedule extends Window implements EventListener<Event>
 			tmp.detach();
 		
 		calendars = (Calendars) calendarContainer.getFellow("cal");
-		TimeZone timezone = SessionManager.getAppDesktop().getClientInfo().timeZone;
+		TimeZone timezone = TimeZone.getTimeZone(SessionManager.getAppDesktop().getClientInfo().clientZoneId);
 		calendars.addTimeZone(timezone.getID(), timezone);
 		
 		calendars.addEventListener(CalendarsEvent.ON_EVENT_CREATE, this);

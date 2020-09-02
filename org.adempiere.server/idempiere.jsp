@@ -43,7 +43,7 @@ Author URI: http://www.bmlaurus.com
 					<ul>
 						<li id="main-requestBtns-btnLogin">
 							<a href="<%=Prop.getProperty(Prop.WEBUI_LINK)%>" target="_self">
-								<img name="img_webui" src="<%=Prop.getImage("img_webui.png")%>" border="0" />
+								<img name="img_webui" id="img_webui" src="<%=Prop.getImage("img_webui.png")%>" border="0" />
 							</a>
 							<div class="main-txt-btn"><%=Prop.getProperty(Prop.WEBUI_TEXT)%></div>
 						</li>

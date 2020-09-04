@@ -34,8 +34,20 @@
 }
 
 .login-box-header-logo {
-	padding-top: 20px;
-	padding-bottom: 25px;
+	height: 133px;
+}
+
+img[src*="/images/login-logo.png"]{
+	height: 100%;
+}
+
+
+.about-main-panel-logo img[src*="/images/login-logo.png"]{
+	height: 133px;
+}
+
+img[src*="/images/header-logo.png"]{
+	height: 45px;
 }
 
 .login-box-footer {

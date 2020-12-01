@@ -88,7 +88,7 @@ jobs:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       run: |
         export MAVEN_OPTS="-Xmx5G -Dorg.slf4j.simpleLogger.defaultLogLevel=warn"
-        sonarProject="-Dsonar.projectKey=idempiere_idempiere -Dsonar.organization=idempiere"
+        sonarProject="-Dsonar.projectKey=motive_idempiere -Dsonar.organization=motive"
         sonar="-Dsonar.java.source=$java -Dsonar.java.target=$java -Dsonar.host.url=https://sonarcloud.io -Dsonar.log.level=WARN"
         codeql="-Dfindbugs.skip -Dcheckstyle.skip -Dpmd.skip=true -Denforcer.skip -Dmaven.javadoc.skip -DskipTests -Dmaven.test.skip.exec -Dlicense.skip=true -Drat.skip=true"
         mvn -B -V -e $codeql $sonar $sonarProject verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar

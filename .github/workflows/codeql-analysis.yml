@@ -57,6 +57,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       run: |
+        echo $(dirname $github.repository)
         export MAVEN_OPTS="-Xmx7G"
         sonarProject="-Dsonar.projectKey=motiveth_idempiere -Dsonar.organization=motiveth"
         sonar="-Dsonar.java.source=$java -Dsonar.java.target=$java -Dsonar.host.url=https://sonarcloud.io"

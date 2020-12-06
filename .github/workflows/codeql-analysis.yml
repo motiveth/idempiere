@@ -90,7 +90,6 @@ jobs:
     # on case PR it check out to commit is merger of PR to base (master)
     - name: Checkout repository
       uses: actions/checkout@v2
-      with:
 
     - name: Cache material
       uses: actions/cache@v2
